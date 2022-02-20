@@ -1,0 +1,13 @@
+# Build files
+bin/
+obj/
+
+# VS Project files
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.*
+
+# Make files
+Makefile
+*.make
