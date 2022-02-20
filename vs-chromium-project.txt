@@ -1,0 +1,9 @@
+[SearchableFiles.ignore]
+.git/
+.vs/
+bin/
+obj/
+
+[SearchableFiles.include]
+*.cpp
+*.h
