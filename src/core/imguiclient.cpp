@@ -9,7 +9,9 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 
-#include <chrono>
+#include <array>
+#include <cstdio>
+#include <string>
 
 namespace coffeepot
 {
@@ -56,15 +58,24 @@ namespace coffeepot
     void ImGuiClient::tick(bool bShowDemo /*= false*/)
     {
         ImGui::DockSpaceOverViewport();
- 
-        if (ImGui::Begin("Coffeepot"))
+
+        if (ImGui::BeginMainMenuBar())
         {
-            if (ImGui::Button("Click me"))
+            if (bShowDemo && ImGui::MenuItem("Exec"))
             {
-                CP_DEBUG("Button clicked");
+                std::array<char, 128> buffer;
+                FILE* pipe = popen("git status", "r");
+                while (fgets(buffer.data(), 128, pipe) != nullptr)
+                {
+                    const size_t eolIndex = std::strcspn(buffer.data(), "\r\n\0");
+                    buffer[eolIndex] = '\0';
+
+                    CP_INFO(buffer.data());
+                }
+                pclose(pipe);
             }
-            
-            ImGui::End();
+
+            ImGui::EndMainMenuBar();
         }
     }
     
