@@ -5,6 +5,10 @@ workspace "coffeepot"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+include "thirdparty/glfw"
+include "thirdparty/glad"
+include "thirdparty/imgui"
+
 project "coffeepot"
     kind "ConsoleApp"
     language "C++"
@@ -14,7 +18,16 @@ project "coffeepot"
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
     includedirs {
-        "thirdparty/spdlog/include"
+        "thirdparty/spdlog/include",
+        "thirdparty/glfw/include",
+        "thirdparty/glad/include",
+        "thirdparty/imgui"
+    }
+
+    links {
+        "glfw",
+        "glad",
+        "imgui"
     }
 
     files { "src/**.h", "src/**.cpp" }
