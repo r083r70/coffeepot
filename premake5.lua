@@ -13,6 +13,10 @@ project "coffeepot"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
+    includedirs {
+        "thirdparty/spdlog/include"
+    }
+
     files { "src/**.h", "src/**.cpp" }
 
     filter "system:windows"

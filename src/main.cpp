@@ -1,7 +1,8 @@
-#include<iostream>
+#include "core/log.h"
 
 int main(void)
 {
-    std::cout << "Hello world!" << std::endl;
+    coffeepot::Log::Init();
+    CP_DEBUG("Hello world!");
     return 0;
 }
