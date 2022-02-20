@@ -4,8 +4,8 @@
 #include "log.h"
 #include "window.h"
 
+#include "GLFW/glfw3.h"
 #include "imgui.h"
-
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 
@@ -55,7 +55,17 @@ namespace coffeepot
 
     void ImGuiClient::tick(bool bShowDemo /*= false*/)
     {
-        ImGui::ShowDemoWindow(&bShowDemo);
+        ImGui::DockSpaceOverViewport();
+ 
+        if (ImGui::Begin("Coffeepot"))
+        {
+            if (ImGui::Button("Click me"))
+            {
+                CP_DEBUG("Button clicked");
+            }
+            
+            ImGui::End();
+        }
     }
     
     void ImGuiClient::postTick()
@@ -66,10 +76,10 @@ namespace coffeepot
         const ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
-            //GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            GLFWwindow* backupCurrentContext = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
-            //glfwMakeContextCurrent(backup_current_context);
+            glfwMakeContextCurrent(backupCurrentContext);
         }
     }
 }
