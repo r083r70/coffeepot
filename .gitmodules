@@ -7,3 +7,6 @@
 [submodule "thirdparty/imgui"]
 	path = thirdparty/imgui
 	url = git@github.com:r083r70/imgui
+[submodule "thirdparty/premake-vscode"]
+	path = thirdparty/premake-vscode
+	url = git@github.com:Enhex/premake-vscode

@@ -2,11 +2,16 @@
 bin/
 obj/
 
-# VS Project files
+# VS files
 .vs/
 *.sln
 *.vcxproj
 *.vcxproj.*
+
+# VSCode files
+.vscode/
+coffeepot/
+*.code-workspace
 
 # Make files
 Makefile

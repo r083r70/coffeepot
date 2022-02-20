@@ -1,37 +1,64 @@
-#include "core/log.h"
-#include "core/imguibase.h"
 
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
+#include "core/events.h"
+#include "core/imguiclient.h"
+#include "core/log.h"
+#include "core/window.h"
+
+const char* title = "Coffeepot";
+bool bShowDemo = true;
+bool bShouldClose = false;
+
+int32_t width = 640, height = 360;
+
+void onEvent(coffeepot::Event& event)
+{
+    switch (event.getType())
+    {
+    case coffeepot::EventType::WindowClosed:
+        bShouldClose = true;
+        break;
+    case coffeepot::EventType::WindowResized: {
+        auto windowResizedEvent = static_cast<coffeepot::WindowResizedEvent&>(event);
+        width = windowResizedEvent.m_Width;
+        height = windowResizedEvent.m_Height;
+    } break;
+    case coffeepot::EventType::Char:
+        CP_DEBUG("Char");
+        break;
+    }
+}
 
 int main(void)
 {
     coffeepot::log::init();
-    CP_DEBUG("log::init");
 
-    glfwInit();
-    CP_DEBUG("glfwInit");
-
-    auto tt = "Hello world!";
-    auto window = glfwCreateWindow(500, 500, tt, nullptr, nullptr);
-    CP_DEBUG("glfwCreateWindow");
-
-    glfwMakeContextCurrent(window);
-    CP_DEBUG("glfwMakeContextCurrent");
-
-    int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    CP_DEBUG("gladLoadGLLoader: {0}", status);
-
-    coffeepot::imguibase::init(window);
-    CP_DEBUG("imguibase::init");
-
-    while (true)
+    coffeepot::Window window;
+    if (!window.init(title, width, height))
     {
-        glfwPollEvents();
-        glfwSwapBuffers(window);
-
-        coffeepot::imguibase::tick();
+        CP_FATAL("Failed to init Window");
+        return -1;
     }
+
+    window.setEventCallback(&onEvent);
+
+    coffeepot::ImGuiClient imguiClient;
+    if (!imguiClient.init(window))
+    {
+        CP_FATAL("Failed to init ImGuiClient");
+        return -1;
+    }
+
+    while (!bShouldClose)
+    {
+        window.tick();
+
+        imguiClient.preTick(width, height);
+        imguiClient.tick(bShowDemo);
+        imguiClient.postTick();
+    }
+
+    imguiClient.deinit();
+    window.deinit();
 
     return 0;
 }
