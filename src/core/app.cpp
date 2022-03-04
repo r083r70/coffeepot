@@ -21,8 +21,10 @@ namespace coffeepot
         if (!m_Window.init(m_Title, m_Width, m_Height))
             return false;
         
-        if (m_ImGuiClient.init(m_Window))
+        if (!m_ImGuiClient.init(m_Window))
             return false;
+
+        return true;
     }
     
     void App::run()

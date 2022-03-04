@@ -32,14 +32,25 @@ project "coffeepot"
         "imgui"
     }
 
-    files { "src/**.h", "src/**.cpp" }
+    files {
+        "src/**.h",
+        "src/**.cpp",
+
+        -- ImGui files
+        "thirdparty/imgui/backends/imgui_impl_glfw.h",
+        "thirdparty/imgui/backends/imgui_impl_glfw.cpp",
+        "thirdparty/imgui/backends/imgui_impl_opengl3.h",
+        "thirdparty/imgui/backends/imgui_impl_opengl3.cpp"
+    }
 
     filter "system:windows"
         systemversion "latest"
+        defines { "CP_WIN" }
 
     filter "system:linux"
         systemversion "latest"
         links { "pthread", "dl" }
+        defines { "CP_LINUX" }
 
     filter "configurations:Debug"
         defines { "DEBUG" }

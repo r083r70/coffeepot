@@ -45,9 +45,9 @@ namespace coffeepot
         glfwSwapBuffers(m_Handle);
     }
 
-    void Window::getSize(int& x, int& y) const
+    void Window::getSize(int& width, int& height) const
     {
-        glfwGetWindowSize(m_Handle, &x, &y);
+        glfwGetWindowSize(m_Handle, &width, &height);
     }
 
     void Window::setupEventCallbacks()

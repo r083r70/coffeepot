@@ -2,7 +2,7 @@
 
 #include "events.h"
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace coffeepot
 {
@@ -17,7 +17,7 @@ namespace coffeepot
         inline GLFWwindow* getHandle() const { return m_Handle; }
         inline void setEventCallback(EventCallbackFn callback) { m_User.onEvent = callback; }
         
-        void getSize(int& x, int& y) const;
+        void getSize(int& width, int& height) const;
     
     private:
         void setupEventCallbacks();
