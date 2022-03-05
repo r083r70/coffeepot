@@ -41,12 +41,12 @@ namespace coffeepot
     class CharEvent : public Event
     {
     public:
-        CharEvent(uint32_t keycode) : m_Keycode(keycode) {}
+        CharEvent(u_int32_t keycode) : m_Keycode(keycode) {}
         virtual EventType getType() const override { return EventType::Char; }
         virtual const char *toString() const override { return "CharEvent"; }
 
     public:
-        uint32_t m_Keycode;
+        u_int32_t m_Keycode;
     };
 
     using EventCallbackFn = std::function<void(Event&)>;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "imguiclient.h"
+#include "screens.h"
 #include "window.h"
 
 namespace coffeepot
@@ -19,11 +20,13 @@ namespace coffeepot
         Window m_Window;
         ImGuiClient m_ImGuiClient;
 
+        MainMenuBarScreen MainMenuBar;
+        CmdListScreen CmdList;
+
         const char* m_Title;
         int32_t m_Width;
         int32_t m_Height;
 
         bool b_ShouldClose;
-        bool b_ShowDemo;
     };
 }

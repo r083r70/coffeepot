@@ -11,7 +11,7 @@ namespace coffeepot
         void deinit();
 
         void preTick(int32_t width, int32_t height);
-        void tick(bool bShowDemo = false);
+        void tick();
         void postTick();
 
     private:

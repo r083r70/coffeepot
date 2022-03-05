@@ -10,7 +10,6 @@ namespace coffeepot
         , m_Width(640)
         , m_Height(360)
         , b_ShouldClose(false)
-        , b_ShowDemo(true)
     { }
 
     bool App::init()
@@ -34,7 +33,11 @@ namespace coffeepot
             m_Window.tick();
 
             m_ImGuiClient.preTick(m_Width, m_Height);
-            m_ImGuiClient.tick(b_ShowDemo);
+            m_ImGuiClient.tick();
+
+            MainMenuBar.tick();
+            CmdList.tick();
+            
             m_ImGuiClient.postTick();
         }
 
