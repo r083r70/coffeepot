@@ -10,7 +10,7 @@ namespace coffeepot
         , m_Width(640)
         , m_Height(360)
         , b_ShouldClose(false)
-    { }
+    {}
 
     bool App::init()
     {
@@ -22,6 +22,8 @@ namespace coffeepot
         
         if (!m_ImGuiClient.init(m_Window))
             return false;
+        
+        ActionsManager::get()->init();
 
         return true;
     }
@@ -39,8 +41,11 @@ namespace coffeepot
             CmdList.tick();
             
             m_ImGuiClient.postTick();
+
+            ActionsManager::get()->tick();
         }
 
+        ActionsManager::get()->deinit();
         m_ImGuiClient.deinit();
         m_Window.deinit();
     }

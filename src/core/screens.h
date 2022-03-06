@@ -1,8 +1,5 @@
 #pragma once
 
-#include "actions.h"
-#include <vector>
-
 namespace coffeepot
 {
     class Screen
@@ -20,10 +17,6 @@ namespace coffeepot
     class CmdListScreen : public Screen
     {
     public:
-        CmdListScreen();
         virtual void tick() override;
-
-    private:
-        std::vector<Action*> m_Actions;
     };
 }

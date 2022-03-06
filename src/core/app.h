@@ -1,5 +1,6 @@
 #pragma once
 
+#include "actions.h"
 #include "imguiclient.h"
 #include "screens.h"
 #include "window.h"

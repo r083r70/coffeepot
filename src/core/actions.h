@@ -2,6 +2,7 @@
 
 #include <array>
 #include <string>
+#include <vector>
 
 namespace coffeepot
 {
@@ -41,5 +42,25 @@ namespace coffeepot
         
         std::array<char, 128> m_Buffer;
         FILE* m_Pipe;
+    };
+
+    class ActionsManager
+    {
+    public:
+        static ActionsManager* get();
+
+        bool init();
+        void deinit();
+
+        void tick();
+
+        const std::vector<Action*>& getAllActions() const { return m_Actions; }
+    
+    protected:
+        ActionsManager() = default;
+
+    private:
+        static ActionsManager* m_Instance;
+        std::vector<Action*> m_Actions;
     };
 }
