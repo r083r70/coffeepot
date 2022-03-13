@@ -1,9 +1,11 @@
 #pragma once
 
-#include "actions.h"
+#include "actions/actionmanager.h"
 #include "imguiclient.h"
-#include "screens.h"
+#include "screens/screens.h"
 #include "window.h"
+
+#include <vector>
 
 namespace coffeepot
 {
@@ -21,8 +23,7 @@ namespace coffeepot
         Window m_Window;
         ImGuiClient m_ImGuiClient;
 
-        MainMenuBarScreen MainMenuBar;
-        CmdListScreen CmdList;
+        std::vector<Screen*> m_Screens;
 
         const char* m_Title;
         int32_t m_Width;

@@ -23,7 +23,8 @@ project "coffeepot"
         "thirdparty/spdlog/include",
         "thirdparty/glfw/include",
         "thirdparty/glad/include",
-        "thirdparty/imgui"
+        "thirdparty/imgui",
+        "src/"
     }
 
     links {

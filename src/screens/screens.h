@@ -13,10 +13,4 @@ namespace coffeepot
     public:
         virtual void tick() override;
     };
-
-    class CmdListScreen : public Screen
-    {
-    public:
-        virtual void tick() override;
-    };
 }

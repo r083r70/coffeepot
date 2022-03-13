@@ -1,5 +1,7 @@
+
 #include "app.h"
 
+#include "screens/actionscreen.h"
 #include "events.h"
 #include "log.h"
 
@@ -22,6 +24,9 @@ namespace coffeepot
         
         if (!m_ImGuiClient.init(m_Window))
             return false;
+
+        m_Screens.push_back(new MainMenuBarScreen());
+        m_Screens.push_back(new ActionsScreen());
         
         ActionsManager::get()->init();
 
@@ -37,8 +42,7 @@ namespace coffeepot
             m_ImGuiClient.preTick(m_Width, m_Height);
             m_ImGuiClient.tick();
 
-            MainMenuBar.tick();
-            CmdList.tick();
+            std::for_each(m_Screens.begin(), m_Screens.end(), [](auto Elem) { Elem->tick(); });
             
             m_ImGuiClient.postTick();
 
@@ -46,6 +50,10 @@ namespace coffeepot
         }
 
         ActionsManager::get()->deinit();
+        
+        std::for_each(m_Screens.begin(), m_Screens.end(), [](auto& Elem) { delete Elem; Elem = nullptr; });
+        m_Screens.clear();
+        
         m_ImGuiClient.deinit();
         m_Window.deinit();
     }
