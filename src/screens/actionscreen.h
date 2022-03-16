@@ -4,7 +4,8 @@
 
 namespace coffeepot
 {
-    class Action;
+	class Action;
+	struct Option;
     
     class ActionsScreen : public Screen
     {
@@ -12,6 +13,7 @@ namespace coffeepot
         virtual void tick() override;
 
     private:
-        void showAction(const Action* action);
+		void showAction(Action* action);
+		void showOption(Option& option);
     };
 }

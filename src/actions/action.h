@@ -27,7 +27,9 @@ namespace coffeepot
 
         ~Action() { abort(); }
 
-        inline const std::vector<Option>& getOptions() const { return m_Options; }
+		inline const std::vector<Option>& getOptions() const { return m_Options; }
+		inline std::vector<Option>& getOptions() { return m_Options; }
+
         inline size_t getOptionsCount() const { return m_Options.size(); }
 
         std::string getName() const;

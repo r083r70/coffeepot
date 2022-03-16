@@ -66,13 +66,10 @@ namespace coffeepot
             b_ShouldClose = true;
             break;
         case coffeepot::EventType::WindowResized: {
-            auto windowResizedEvent = static_cast<coffeepot::WindowResizedEvent&>(event);
+            const auto& windowResizedEvent = static_cast<coffeepot::WindowResizedEvent&>(event);
             m_Width = windowResizedEvent.m_Width;
             m_Height = windowResizedEvent.m_Height;
-        } break;
-        case coffeepot::EventType::Char:
-            CP_DEBUG("Char");
-            break;
+		} break;
         }
     }
 }
