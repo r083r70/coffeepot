@@ -6,7 +6,7 @@
 
 namespace coffeepot
 {
-    class log
+    class Log
     {
     public:
         static void init();
@@ -18,12 +18,12 @@ namespace coffeepot
 };
 
 #ifdef DEBUG
-#define CP_TRACE(...)   coffeepot::log::getLogger()->trace(__VA_ARGS__)
-#define CP_DEBUG(...)   coffeepot::log::getLogger()->debug(__VA_ARGS__)
-#define CP_INFO(...)    coffeepot::log::getLogger()->info(__VA_ARGS__)
-#define CP_WARN(...)    coffeepot::log::getLogger()->warn(__VA_ARGS__)
-#define CP_ERROR(...)   coffeepot::log::getLogger()->error(__VA_ARGS__)
-#define CP_FATAL(...)   coffeepot::log::getLogger()->critical(__VA_ARGS__)
+#define CP_TRACE(...)   coffeepot::Log::getLogger()->trace(__VA_ARGS__)
+#define CP_DEBUG(...)   coffeepot::Log::getLogger()->debug(__VA_ARGS__)
+#define CP_INFO(...)    coffeepot::Log::getLogger()->info(__VA_ARGS__)
+#define CP_WARN(...)    coffeepot::Log::getLogger()->warn(__VA_ARGS__)
+#define CP_ERROR(...)   coffeepot::Log::getLogger()->error(__VA_ARGS__)
+#define CP_FATAL(...)   coffeepot::Log::getLogger()->critical(__VA_ARGS__)
 #else
 #define CP_TRACE(...)
 #define CP_DEBUG(...)

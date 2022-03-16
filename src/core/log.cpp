@@ -6,9 +6,9 @@
 
 namespace coffeepot
 {
-    std::shared_ptr<spdlog::logger> log::s_Logger;
+    std::shared_ptr<spdlog::logger> Log::s_Logger;
 
-    void log::init()
+    void Log::init()
     {
         spdlog::set_pattern("%^%T - [%l]: %v%$");
         s_Logger = spdlog::stdout_color_mt("console");

@@ -16,7 +16,7 @@ namespace coffeepot
 
     bool App::init()
     {
-        log::init();
+        Log::init();
 
         m_Window.setEventCallback(std::bind(&App::onEvent, this, std::placeholders::_1));
         if (!m_Window.init(m_Title, m_Width, m_Height))
