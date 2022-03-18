@@ -10,27 +10,30 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include "thirdparty/glfw"
 include "thirdparty/glad"
 include "thirdparty/imgui"
+include "thirdparty/yaml-cpp"
 
 project "coffeepot"
     kind "ConsoleApp"
     language "C++"
-    cppdialect "c++17"
+    cppdialect "C++17"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
     includedirs {
-        "thirdparty/spdlog/include",
-        "thirdparty/glfw/include",
+        "src/",
         "thirdparty/glad/include",
+        "thirdparty/glfw/include",
         "thirdparty/imgui",
-        "src/"
+        "thirdparty/spdlog/include",
+        "thirdparty/yaml-cpp/include"
     }
 
     links {
         "glfw",
         "glad",
-        "imgui"
+        "imgui",
+		"yaml-cpp"
     }
 
     files {
