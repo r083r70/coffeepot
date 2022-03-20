@@ -8,50 +8,39 @@ namespace coffeepot
     struct Option
     {
     public:
-        Option(const std::string& name, int32_t id, const std::string& value)
-            : m_Name(name), m_ID(id) , m_DefaultValue(value) , m_Value(value)
-        {}
-
-        std::string m_Name;
         int32_t m_ID;
+        std::string m_Name;
 
         std::string m_DefaultValue;
         std::string m_Value;
     };
 
-    class Action
+    struct Action
     {
     public:
-        static Action* Create(const std::string& command);
-        static Action* CreateDemo();
+        int32_t m_ID;
+        std::string m_Name;
 
-        ~Action() { abort(); }
+        std::string m_Command;
+        std::vector<Option> m_Options;
+    };
 
-		inline const std::vector<Option>& getOptions() const { return m_Options; }
-		inline std::vector<Option>& getOptions() { return m_Options; }
-
-        inline size_t getOptionsCount() const { return m_Options.size(); }
-
-        std::string getName() const;
-        bool isRunning() const;
+    class ActionExecutor
+    {
+    public:
+        ActionExecutor(const Action& action);
+        ~ActionExecutor() { stop(); }
 
         bool start();
         bool update();
-
-        void abort();
+        void stop();
 
     protected:
-        Action(const std::string& command);
-
         std::string createFullCommand() const;
         const std::string& getOptionValueByID(int32_t id) const;
 
-        void stop();
-
     private:
-        std::string m_Command;
-        std::vector<Option> m_Options;
-
+        Action m_Action;
         FILE* m_Pipe;
     };
 }

@@ -1,0 +1,17 @@
+actions:
+  - id: 1
+    name: Git Status
+    command: git status
+  - id: 2
+    name: Git -V
+    command: git --version
+  - id: 3
+    name: List Files
+    command: ls -lX
+  - id: 4
+    name: Git Fetch
+    command: git fetch origin $0
+    options:
+      - id: 0
+        name: Branch
+        defaultValue: master

@@ -1,6 +1,8 @@
 
 #include "actionmanager.h"
 
+#include "core/serializer.h"
+
 namespace coffeepot
 {
     ActionsManager* ActionsManager::m_Instance = nullptr;
@@ -15,38 +17,27 @@ namespace coffeepot
 
     bool ActionsManager::init()
     {
-        // #todo Load from file (YAML)
-        m_Actions.push_back(Action::Create("git status"));
-        m_Actions.push_back(Action::Create("git --version"));
-        m_Actions.push_back(Action::Create("ls -lX"));
-        m_Actions.push_back(Action::CreateDemo());
+        Serializer::loadActions(m_Actions);
         return true;
     }
 
     void ActionsManager::deinit()
     {
-        for (auto it = m_Actions.begin(); it != m_Actions.end(); it++)
-        {
-            Action* const action = *it;
-            if (action == nullptr)
-                continue;
-                
-            if (action->isRunning())
-                action->abort();
-
-            delete action;
-        }
-
         m_Actions.clear();
     }
 
     void ActionsManager::tick()
     {
-        for (auto it = m_Actions.begin(); it != m_Actions.end(); it++)
-        {
-            Action* const action = *it;
-            if (action != nullptr && action->isRunning())
-                action->update();
-        }
+        if (m_Executor && !m_Executor->update())
+            m_Executor.reset();
+    }
+
+    bool ActionsManager::startAction(Action& action)
+    {
+        if (m_Executor)
+            return false;
+
+        m_Executor = std::make_unique<ActionExecutor>(action);
+        return m_Executor->start();
     }
 }

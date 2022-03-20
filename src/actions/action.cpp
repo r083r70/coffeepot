@@ -28,39 +28,20 @@ namespace coffeepot
 #endif
     }
 
-    Action* Action::Create(const std::string& command)
-    {
-        return new Action(command);
-    }
+    ActionExecutor::ActionExecutor(const Action& action)
+        : m_Action(action)
+        , m_Pipe(nullptr)
+    {}
 
-    Action* Action::CreateDemo()
-    {
-        auto action = new Action("git fetch origin $0");
-        action->m_Options.push_back({"Branch", 0, "master"});
-        return action;
-    }
-
-    bool Action::isRunning() const
-    {
-        return m_Pipe != nullptr;
-    }
-
-    std::string Action::getName() const
-    {
-        static std::string prefix = "cmd: ";
-        return prefix + createFullCommand();
-    }
-
-    bool Action::start()
+    bool ActionExecutor::start()
     {
         m_Pipe = pOpen(createFullCommand().c_str());
         return m_Pipe != nullptr;
     }
 
-    bool Action::update()
+    bool ActionExecutor::update()
     {
         static std::array<char, 128> s_Buffer;
-
         if (fgets(s_Buffer.data(), 128, m_Pipe) != nullptr)
         {
             const size_t eolIndex = std::strcspn(s_Buffer.data(), "\r\n\0");
@@ -75,21 +56,18 @@ namespace coffeepot
         return false;
     }
 
-    void Action::abort()
+    void ActionExecutor::stop()
     {
-        stop();
+        if (m_Pipe != nullptr)
+            pClose(m_Pipe);
+        m_Pipe = nullptr;
     }
 
-    Action::Action(const std::string& command)
-        : m_Command(command)
-        , m_Options()
-        , m_Pipe(nullptr)
-    {}
-
-    std::string Action::createFullCommand() const
+    std::string ActionExecutor::createFullCommand() const
     {
         std::string result{""};
-        for (auto it = m_Command.cbegin(); it != m_Command.cend(); ++it)
+        const std::string& command = m_Action.m_Command;
+        for (auto it = command.cbegin(); it != command.cend(); ++it)
         {
             const char c = *it;
             if (c != '$')
@@ -104,7 +82,7 @@ namespace coffeepot
             auto last = start;
             do
                 last++;
-            while (last != m_Command.cend() && std::isdigit(*last));
+            while (last != command.cend() && std::isdigit(*last));
             
             std::string idStr{start, last};
             int id = std::atoi(idStr.data());
@@ -116,23 +94,17 @@ namespace coffeepot
         return result;
     }
 
-    const std::string& Action::getOptionValueByID(int32_t id) const
+    const std::string& ActionExecutor::getOptionValueByID(int32_t id) const
     {
-        for (auto it = m_Options.cbegin(); it != m_Options.cend(); ++it)
+        const std::vector<Option>& options = m_Action.m_Options;
+        for (auto it = options.cbegin(); it != options.cend(); ++it)
         {
             const Option& option = *it;
             if (option.m_ID == id)
-                return option.m_Value; 
+                return option.m_Value;
         }
 
         static std::string s_Empty{""};
         return s_Empty;
-    }
-
-    void Action::stop()
-    {
-        if (m_Pipe != nullptr)
-            pClose(m_Pipe);
-        m_Pipe = nullptr;
     }
 }

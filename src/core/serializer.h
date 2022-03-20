@@ -8,7 +8,8 @@ namespace coffeepot
 
 	class Serializer
 	{
-		static bool saveActions(const std::vector<Action*>& actions);
-		static bool loadActions(std::vector<Action*>& actions);
+    public:
+		static bool saveActions();
+		static bool loadActions(std::vector<Action>& actions);
 	};
 }

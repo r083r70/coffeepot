@@ -16,7 +16,7 @@ namespace coffeepot
 
 		auto option = static_cast<Option*>(data->UserData);
 		option->m_Value.resize(data->BufTextLen);
-		data->Buf = (char*)option->m_Value.c_str();
+		data->Buf = const_cast<char*>(option->m_Value.c_str());
 		return 1;
 	}
 
@@ -28,43 +28,38 @@ namespace coffeepot
         if (!ImGui::BeginTable("", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
             return;
     
-        const auto& actions = ActionsManager::get()->getAllActions();
-        for (auto it = actions.begin(); it != actions.end(); it++)
-        {
-            Action* const action = *it;
-            if (action != nullptr)
-                showAction(action);
-        }
+        auto& actions = ActionsManager::get()->getAllActions();
+        std::for_each(actions.begin(), actions.end(), [this](auto& elem) { showAction(elem); });
 
         ImGui::EndTable();
         ImGui::End();
     }
 
-    void ActionsScreen::showAction(Action* action)
+    void ActionsScreen::showAction(Action& action)
     {
-        ImGui::PushID(action);
-        const auto actionName = action->getName();
+        ImGui::PushID(&action);
+        const std::string& actionName = action.m_Name;
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
         
         bool bTreeNode = false;
-        if (action->getOptionsCount() != 0)
+        if (action.m_Options.size() != 0)
             bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
         else
             ImGui::BulletText(actionName.c_str());
 
         ImGui::TableSetColumnIndex(1);
-        if (ImGui::Button("Run") && !action->isRunning())
+        if (ImGui::Button("Run"))
         {
-            const bool bIsActionStarted = action->start();
+            const bool bIsActionStarted = ActionsManager::get()->startAction(action);
             CP_DEBUG("[{}] Start => {}", actionName, bIsActionStarted);
         }
 
         if (bTreeNode)
         {
-            auto& options = action->getOptions();
+            auto& options = action.m_Options;
 			std::for_each(options.begin(), options.end(), [this](auto& elem) { showOption(elem); });
 
             ImGui::TreePop();

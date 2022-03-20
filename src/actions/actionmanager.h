@@ -1,5 +1,7 @@
 
 #include "action.h"
+
+#include <memory>
 #include <vector>
 
 namespace coffeepot
@@ -14,13 +16,16 @@ namespace coffeepot
 
         void tick();
 
-        const std::vector<Action*>& getAllActions() const { return m_Actions; }
-    
+        std::vector<Action>& getAllActions() { return m_Actions; }
+        bool startAction(Action& action);
+
     protected:
         ActionsManager() = default;
 
     private:
         static ActionsManager* m_Instance;
-        std::vector<Action*> m_Actions;
+
+        std::unique_ptr<ActionExecutor> m_Executor;
+        std::vector<Action> m_Actions;
     };
 }

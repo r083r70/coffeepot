@@ -1,6 +1,7 @@
 
 #include "screens.h"
 
+#include "core/serializer.h"
 #include <imgui.h>
 
 void coffeepot::MainMenuBarScreen::tick()
@@ -8,6 +9,8 @@ void coffeepot::MainMenuBarScreen::tick()
     if (!ImGui::BeginMainMenuBar())
         return;
 
-    // #todo MainMenuBar
+    if (ImGui::Button("Save"))
+        coffeepot::Serializer::saveActions();
+
     ImGui::EndMainMenuBar();
 }
