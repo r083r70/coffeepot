@@ -7,35 +7,63 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
-namespace coffeepot
+namespace ImGui
 {
-	int inputTextCallback(ImGuiInputTextCallbackData* data)
+    int inputStringCallback(ImGuiInputTextCallbackData* data)
 	{
         if (data->EventFlag != ImGuiInputTextFlags_CallbackResize)
             return 0;
 
-		auto option = static_cast<Option*>(data->UserData);
-		option->m_Value.resize(data->BufTextLen);
-		data->Buf = const_cast<char*>(option->m_Value.c_str());
+		auto str = static_cast<std::string*>(data->UserData);
+		str->resize(data->BufTextLen);
+		data->Buf = const_cast<char*>(str->c_str());
 		return 1;
 	}
 
+    void InputString(const char* label, std::string& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None)
+    {
+		ImGui::PushID(label);
+        flags |= ImGuiInputTextFlags_CallbackResize;
+		ImGui::InputText("", str.data(), str.size() + 1, flags, &inputStringCallback, &str);
+		ImGui::PopID();
+    }
+}
+
+namespace coffeepot
+{
     void ActionsScreen::tick()
     {
-        if (!ImGui::Begin("Commands"))
+        if (!ImGui::Begin("Actions"))
             return;
         
-        if (!ImGui::BeginTable("", 2, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_Resizable))
+        const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
+        const float footerHeight = ImGui::GetFrameHeight() + itemSpacing;
+        if (ImGui::BeginChild("Actions", ImVec2(0, -footerHeight)))
+        {
+            if (m_CreatingAction)
+                renderActionBuilder();
+            else
+                renderActions();
+
+            ImGui::EndChild();
+        }
+
+        renderFooter();
+        ImGui::End();
+    }
+    
+    void ActionsScreen::renderActions()
+    {
+        if (!ImGui::BeginTable("", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
             return;
     
         auto& actions = ActionsManager::get()->getAllActions();
-        std::for_each(actions.begin(), actions.end(), [this](auto& elem) { showAction(elem); });
+        std::for_each(actions.begin(), actions.end(), [this](auto& elem) { renderAction(elem); });
 
         ImGui::EndTable();
-        ImGui::End();
     }
 
-    void ActionsScreen::showAction(Action& action)
+    void ActionsScreen::renderAction(Action& action)
     {
         ImGui::PushID(&action);
         const std::string& actionName = action.m_Name;
@@ -43,7 +71,7 @@ namespace coffeepot
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
-        
+
         bool bTreeNode = false;
         if (action.m_Options.size() != 0)
             bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
@@ -60,16 +88,15 @@ namespace coffeepot
         if (bTreeNode)
         {
             auto& options = action.m_Options;
-			std::for_each(options.begin(), options.end(), [this](auto& elem) { showOption(elem); });
+			std::for_each(options.begin(), options.end(), [this](auto& elem) { renderOption(elem); });
 
             ImGui::TreePop();
         }
 
         ImGui::PopID();
-        ImGui::Separator();
     }
 
-	void ActionsScreen::showOption(Option& option)
+	void ActionsScreen::renderOption(Option& option)
 	{
 		ImGui::PushID(&option);
 		ImGui::TableNextRow();
@@ -91,11 +118,8 @@ namespace coffeepot
 		const float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
 		ImGui::GetStyle().ItemSpacing.x = 0;
 
-		// Draw InputText - PushID to avoid Label
-		ImGui::PushID("OptionValue");
-		ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackResize;
-		ImGui::InputText("", option.m_Value.data(), option.m_Value.size() + 1, inputTextFlags, &inputTextCallback, &option);
-		ImGui::PopID();
+		// Draw InputText
+        ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
 
 		// Draw Button
 		ImGui::SameLine();
@@ -105,7 +129,99 @@ namespace coffeepot
 		// Restore ItemSpacing
 		ImGui::GetStyle().ItemSpacing.x = itemSpacing;
 
-		ImGui::NextColumn();
 		ImGui::PopID();
 	}
+
+    void ActionsScreen::renderActionBuilder()
+    {
+        ImGui::PushID(&m_ActionTemplate);
+        if (!ImGui::BeginTable("", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
+            return;
+        
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+		ImGui::AlignTextToFramePadding();
+        ImGui::Text("Name");
+        ImGui::TableSetColumnIndex(1);
+		ImGui::InputString("ActionName", m_ActionTemplate.m_Name);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+		ImGui::AlignTextToFramePadding();
+        ImGui::Text("Command");
+        ImGui::TableSetColumnIndex(1);
+		ImGui::InputString("ActionCommand", m_ActionTemplate.m_Command);
+
+        if (m_ActionTemplate.m_Options.size() != 0)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+		    ImGui::AlignTextToFramePadding();
+            ImGui::Text("Options");
+
+            auto& options = m_ActionTemplate.m_Options;
+            std::for_each(options.begin(), options.end(), [this](auto& elem) { renderOptionBuilder(elem); });
+        }
+
+        ImGui::EndTable();
+        ImGui::Separator();
+
+        if (ImGui::Button("Add Option"))
+        {
+            Option& newOption = m_ActionTemplate.m_Options.emplace_back();
+            newOption.m_ID = m_ActionTemplate.m_Options.size();
+        }
+
+        ImGui::PopID();
+    }
+
+    void ActionsScreen::renderOptionBuilder(Option& option)
+    {
+        ImGui::PushID(&option);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+		ImGui::AlignTextToFramePadding();
+        ImGui::Bullet(); ImGui::SameLine();
+        int cursonPosX = ImGui::GetCursorPosX();
+        ImGui::Text("Name");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::InputString("OptionName", option.m_Name);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+		ImGui::AlignTextToFramePadding();
+        ImGui::SetCursorPosX(cursonPosX);
+        ImGui::Text("DefaultValue");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::InputString("OptionDefaultValue", option.m_DefaultValue);
+
+        ImGui::PopID();
+    }
+
+    void ActionsScreen::renderFooter()
+    {
+        if (m_CreatingAction)
+        {
+            if (ImGui::Button("Save Action"))
+            {
+                m_CreatingAction = false;
+                ActionsManager::get()->getAllActions().push_back(m_ActionTemplate);
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                m_CreatingAction = false;
+            }
+        }
+        else
+        {
+            if (ImGui::Button("Create new Action"))
+            {
+                m_CreatingAction = true;
+                m_ActionTemplate = Action{};
+            }
+        }
+    }
 }
