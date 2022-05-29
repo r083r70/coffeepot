@@ -11,6 +11,7 @@ obj/
 # VSCode files
 .vscode/
 coffeepot/
+thirdparty/glad/glad
 *.code-workspace
 
 # Make files
