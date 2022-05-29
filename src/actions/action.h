@@ -5,14 +5,25 @@
 
 namespace coffeepot
 {
+    enum class OptionType
+    {
+        Alphanumeric,
+        Alphabetic,
+        Numeric,
+        Selection
+    };
+
     struct Option
     {
     public:
         int32_t m_ID;
         std::string m_Name;
 
-        std::string m_DefaultValue;
         std::string m_Value;
+        std::string m_DefaultValue;
+
+        OptionType m_OptionType;
+        std::vector<std::string> m_SelectableValues;
     };
 
     struct Action

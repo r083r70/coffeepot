@@ -27,6 +27,24 @@ namespace ImGui
 		ImGui::InputText("", str.data(), str.size() + 1, flags, &inputStringCallback, &str);
 		ImGui::PopID();
     }
+
+    void ComboBox(const char* label, std::string& selectedValue, const std::vector<std::string>& selectableValues)
+    {
+		ImGui::PushID(label);
+        if (ImGui::BeginCombo("", selectedValue.c_str()))
+        {
+            for (const auto& value : selectableValues)
+            {
+                bool bSelected = selectedValue == value;
+                ImGui::Selectable(value.c_str(), &bSelected);
+
+                if (bSelected)
+                    selectedValue = value;
+            }
+            ImGui::EndCombo();
+        }
+		ImGui::PopID();
+    }
 }
 
 namespace coffeepot
@@ -110,16 +128,25 @@ namespace coffeepot
 		// > Column 1
 		ImGui::TableSetColumnIndex(1);
 
-		// Set ItemWidth to leave space for the Button
-		const float buttonSize = ImGui::GetFrameHeight();
-		ImGui::SetNextItemWidth(-buttonSize);
-
 		// Remove ItemSpacing
 		const float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
-		ImGui::GetStyle().ItemSpacing.x = 0;
+        const float tmpItemSpacing = itemSpacing * 0.5f;
+		ImGui::GetStyle().ItemSpacing.x = tmpItemSpacing;
+
+		// Set ItemWidth to leave space for the Button
+		const float buttonSize = ImGui::GetFrameHeight();
+		ImGui::SetNextItemWidth(- buttonSize - tmpItemSpacing);
 
 		// Draw InputText
-        ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
+        if (option.m_OptionType == OptionType::Selection)
+        {
+            ImGui::ComboBox("OptionValue", option.m_Value, option.m_SelectableValues);
+        }
+        else
+        {
+            const int InputTextFlag = option.m_OptionType == OptionType::Alphabetic ? 0 : ImGuiInputTextFlags_CharsDecimal;
+            ImGui::InputString("OptionValue", option.m_Value, InputTextFlag | ImGuiInputTextFlags_CharsNoBlank);
+        }
 
 		// Draw Button
 		ImGui::SameLine();

@@ -18,6 +18,26 @@ namespace coffeepot
     bool ActionsManager::init()
     {
         Serializer::loadActions(m_Actions);
+
+        // Test
+        Action action;
+        action.m_ID = m_Actions.size();
+        action.m_Name = "AcTest";
+        action.m_Command = "";
+        
+        Option option;
+        option.m_ID = 0;
+        option.m_Name = "OpTest";
+        option.m_Value = "";
+        option.m_DefaultValue = "";
+        option.m_OptionType = OptionType::Selection;
+        option.m_SelectableValues.push_back("One");
+        option.m_SelectableValues.push_back("Two");
+        option.m_SelectableValues.push_back("Three");
+        option.m_SelectableValues.push_back("Four");
+
+        action.m_Options.push_back(option);
+        m_Actions.push_back(action);
         return true;
     }
 
