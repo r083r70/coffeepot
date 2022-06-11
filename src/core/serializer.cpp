@@ -29,6 +29,9 @@ namespace coffeepot
                 optionNode["name"] = option.m_Name;
                 optionNode["defaultValue"] = option.m_DefaultValue;
 
+                for (auto& value : option.m_PossibleValues)
+                    optionNode["possibleValues"].push_back(value);
+
                 optionNode["options"].push_back(optionNode);
             }
 
@@ -71,6 +74,13 @@ namespace coffeepot
                 option.m_Name = optionNode["name"].as<std::string>();
                 option.m_DefaultValue = optionNode["defaultValue"].as<std::string>();
                 option.m_Value = option.m_DefaultValue;
+
+                if (const auto& possibleValuesNode = optionNode["possibleValues"])
+                {
+                    option.m_PossibleValues.reserve(possibleValuesNode.size());
+                    for (auto jt = possibleValuesNode.begin(); jt != possibleValuesNode.end(); ++jt)
+                        option.m_PossibleValues.push_back(jt->Scalar());
+                }
             }
         }
 

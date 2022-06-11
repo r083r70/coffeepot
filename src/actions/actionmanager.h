@@ -1,6 +1,7 @@
 
 #include "action.h"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -17,7 +18,11 @@ namespace coffeepot
         void tick();
 
         std::vector<Action>& getAllActions() { return m_Actions; }
+        void addAction(Action& action) { m_Actions.push_back(action); }
+
         bool startAction(Action& action);
+
+        const char* readOutput();
 
     protected:
         ActionsManager() = default;
@@ -27,5 +32,7 @@ namespace coffeepot
 
         std::unique_ptr<ActionExecutor> m_Executor;
         std::vector<Action> m_Actions;
+
+        std::array<char, 256> m_OutputBuffer;
     };
 }

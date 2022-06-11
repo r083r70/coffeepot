@@ -2,6 +2,8 @@
 #include "app.h"
 
 #include "screens/actionscreen.h"
+#include "screens/logscreen.h"
+
 #include "events.h"
 #include "log.h"
 
@@ -9,8 +11,8 @@ namespace coffeepot
 {
     App::App()
         : m_Title("Coffeepot")
-        , m_Width(640)
-        , m_Height(360)
+        , m_Width(720)
+        , m_Height(480)
         , b_ShouldClose(false)
     {}
 
@@ -26,6 +28,7 @@ namespace coffeepot
             return false;
 
         m_Screens.push_back(new MainMenuBarScreen());
+        m_Screens.push_back(new LogScreen());
         m_Screens.push_back(new ActionsScreen());
         
         ActionsManager::get()->init();

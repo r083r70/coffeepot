@@ -15,3 +15,14 @@ actions:
       - id: 0
         name: Branch
         defaultValue: master
+  - id: 5
+    name: Test
+    command: ls
+    options:
+      - id: 0
+        name: option
+        defaultValue: One
+        possibleValues:
+          - "One"
+          - "Two"
+          - "Three"

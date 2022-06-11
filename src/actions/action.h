@@ -5,14 +5,6 @@
 
 namespace coffeepot
 {
-    enum class OptionType
-    {
-        Alphanumeric,
-        Alphabetic,
-        Numeric,
-        Selection
-    };
-
     struct Option
     {
     public:
@@ -22,8 +14,7 @@ namespace coffeepot
         std::string m_Value;
         std::string m_DefaultValue;
 
-        OptionType m_OptionType;
-        std::vector<std::string> m_SelectableValues;
+        std::vector<std::string> m_PossibleValues;
     };
 
     struct Action
@@ -43,7 +34,7 @@ namespace coffeepot
         ~ActionExecutor() { stop(); }
 
         bool start();
-        bool update();
+        bool update(char* output);
         void stop();
 
     protected:

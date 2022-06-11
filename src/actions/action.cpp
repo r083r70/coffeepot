@@ -39,18 +39,10 @@ namespace coffeepot
         return m_Pipe != nullptr;
     }
 
-    bool ActionExecutor::update()
+    bool ActionExecutor::update(char* output)
     {
-        static std::array<char, 128> s_Buffer;
-        if (fgets(s_Buffer.data(), 128, m_Pipe) != nullptr)
-        {
-            const size_t eolIndex = std::strcspn(s_Buffer.data(), "\r\n\0");
-            s_Buffer[eolIndex] = '\0';
-            
-            CP_INFO(s_Buffer.data());
-            
+        if (fgets(output, 128, m_Pipe) != nullptr)            
             return true;
-        }
 
         stop();
         return false;

@@ -137,16 +137,11 @@ namespace coffeepot
 		const float buttonSize = ImGui::GetFrameHeight();
 		ImGui::SetNextItemWidth(- buttonSize - tmpItemSpacing);
 
-		// Draw InputText
-        if (option.m_OptionType == OptionType::Selection)
-        {
-            ImGui::ComboBox("OptionValue", option.m_Value, option.m_SelectableValues);
-        }
+		// Draw OptionInput
+        if (option.m_PossibleValues.size() != 0)
+            ImGui::ComboBox("OptionValue", option.m_Value, option.m_PossibleValues);
         else
-        {
-            const int InputTextFlag = option.m_OptionType == OptionType::Alphabetic ? 0 : ImGuiInputTextFlags_CharsDecimal;
-            ImGui::InputString("OptionValue", option.m_Value, InputTextFlag | ImGuiInputTextFlags_CharsNoBlank);
-        }
+            ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
 
 		// Draw Button
 		ImGui::SameLine();
@@ -233,7 +228,7 @@ namespace coffeepot
             if (ImGui::Button("Save Action"))
             {
                 m_CreatingAction = false;
-                ActionsManager::get()->getAllActions().push_back(m_ActionTemplate);
+                ActionsManager::get()->addAction(m_ActionTemplate);
             }
 
             ImGui::SameLine();
