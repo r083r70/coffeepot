@@ -45,6 +45,15 @@ namespace ImGui
         }
 		ImGui::PopID();
     }
+
+    void Checkbox(const char* label, std::string& value, const std::string& checkableValue)
+    {
+        ImGui::PushID(label);
+        bool bSelected = value == checkableValue;
+        ImGui::Checkbox("", &bSelected);
+        value = bSelected ? checkableValue : "";
+        ImGui::PopID();
+    }
 }
 
 namespace coffeepot
@@ -138,15 +147,23 @@ namespace coffeepot
 		ImGui::SetNextItemWidth(- buttonSize - tmpItemSpacing);
 
 		// Draw OptionInput
-        if (option.m_PossibleValues.size() != 0)
-            ImGui::ComboBox("OptionValue", option.m_Value, option.m_PossibleValues);
-        else
+        switch (option.m_ValueInfo.m_Type)
+        {
+        case InputType::Text:
             ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
+            break;
+        case InputType::Checkbox:
+            ImGui::Checkbox("OptionValue", option.m_Value, option.m_ValueInfo.m_Default);
+            break;
+        case InputType::ComboBox:
+            ImGui::ComboBox("OptionValue", option.m_Value, option.m_ValueInfo.m_Choices);
+            break;
+        }
 
 		// Draw Button
 		ImGui::SameLine();
 		if (ImGui::Button("", ImVec2(buttonSize, buttonSize)))
-			option.m_Value = option.m_DefaultValue;
+			option.m_Value = option.m_ValueInfo.m_Default;
 
 		// Restore ItemSpacing
 		ImGui::GetStyle().ItemSpacing.x = itemSpacing;
@@ -192,6 +209,7 @@ namespace coffeepot
         {
             Option& newOption = m_ActionTemplate.m_Options.emplace_back();
             newOption.m_ID = m_ActionTemplate.m_Options.size();
+            newOption.m_ValueInfo.m_Type = InputType::Text;
         }
 
         ImGui::PopID();
@@ -216,7 +234,7 @@ namespace coffeepot
         ImGui::SetCursorPosX(cursonPosX);
         ImGui::Text("DefaultValue");
         ImGui::TableSetColumnIndex(1);
-        ImGui::InputString("OptionDefaultValue", option.m_DefaultValue);
+        ImGui::InputString("OptionDefaultValue", option.m_ValueInfo.m_Default);
 
         ImGui::PopID();
     }

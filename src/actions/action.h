@@ -5,16 +5,30 @@
 
 namespace coffeepot
 {
+    enum class InputType
+    {
+        Text,
+        Checkbox,
+        ComboBox
+    };
+    
+    struct ValueInfo
+    {
+    public:
+        InputType m_Type;
+
+        std::string m_Default;
+        std::vector<std::string> m_Choices;
+    };
+
     struct Option
     {
     public:
         int32_t m_ID;
         std::string m_Name;
-
         std::string m_Value;
-        std::string m_DefaultValue;
 
-        std::vector<std::string> m_PossibleValues;
+        ValueInfo m_ValueInfo;
     };
 
     struct Action

@@ -14,15 +14,23 @@ actions:
     options:
       - id: 0
         name: Branch
-        defaultValue: master
+        default: master
   - id: 5
     name: Test
     command: ls
     options:
       - id: 0
         name: option
-        defaultValue: One
-        possibleValues:
+        default: One
+        choices:
           - "One"
           - "Two"
           - "Three"
+  - id: 6
+    name: Checkbox
+    command: ls
+    options:
+      - id: 0
+        name: option
+        inputType: 1
+        default: master
