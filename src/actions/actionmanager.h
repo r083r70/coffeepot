@@ -1,5 +1,5 @@
 
-#include "action.h"
+#include "playlist.h"
 
 #include <array>
 #include <memory>
@@ -20,18 +20,21 @@ namespace coffeepot
         std::vector<Action>& getAllActions() { return m_Actions; }
         void addAction(Action& action) { m_Actions.push_back(action); }
 
-        bool startAction(Action& action);
+        bool executeAction(const Action& action);
 
         const char* readOutput();
 
     protected:
         ActionsManager() = default;
 
+        bool startNextAction();
+
     private:
         static ActionsManager* m_Instance;
+        std::vector<Action> m_Actions;
 
         std::unique_ptr<ActionExecutor> m_Executor;
-        std::vector<Action> m_Actions;
+        Playlist m_CurrentPlaylist;
 
         std::array<char, 256> m_OutputBuffer;
     };

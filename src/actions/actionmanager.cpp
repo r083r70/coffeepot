@@ -1,8 +1,10 @@
 
 #include "actionmanager.h"
 
+#include "core/log.h"
 #include "core/serializer.h"
 
+#include <assert.h>
 #include <cstring>
 
 namespace coffeepot
@@ -29,17 +31,26 @@ namespace coffeepot
 
     void ActionsManager::tick()
     {
-        if (m_Executor && !m_Executor->update(m_OutputBuffer.data()))
+        if (!m_Executor) // no running action
+            return;
+            
+        char* output = m_OutputBuffer.data();
+        if (m_Executor->update(output)) // still executing
+            return;
+        
+        if (m_CurrentPlaylist.hasNextAction())
+            startNextAction();
+        else
             m_Executor.reset();
     }
 
-    bool ActionsManager::startAction(Action& action)
+    bool ActionsManager::executeAction(const Action& action)
     {
-        if (m_Executor)
-            return false;
+        if (!m_Executor)
+            m_CurrentPlaylist.removeAllAction(); // reset
 
-        m_Executor = std::make_unique<ActionExecutor>(action);
-        return m_Executor->start();
+        m_CurrentPlaylist.addAction(action);
+        return m_Executor || startNextAction();
     }
 
     const char* ActionsManager::readOutput()
@@ -48,5 +59,18 @@ namespace coffeepot
             return nullptr;
 
         return m_OutputBuffer.data();
+    }
+
+    bool ActionsManager::startNextAction()
+    {
+        const Action& nextAction = m_CurrentPlaylist.getNextAction();
+        m_Executor = std::make_unique<ActionExecutor>(nextAction);
+        
+        if (m_Executor->start())
+            return true;
+        
+        CP_ERROR("Couldnt start action {}", nextAction.m_Name);
+        m_Executor.reset();
+        return false;
     }
 }

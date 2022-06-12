@@ -108,8 +108,8 @@ namespace coffeepot
         ImGui::TableSetColumnIndex(1);
         if (ImGui::Button("Run"))
         {
-            const bool bIsActionStarted = ActionsManager::get()->startAction(action);
-            CP_DEBUG("[{}] Start => {}", actionName, bIsActionStarted);
+            const bool bIsActionStarted = ActionsManager::get()->executeAction(action);
+            CP_DEBUG("Executing {} => {}", actionName, bIsActionStarted);
         }
 
         if (bTreeNode)
