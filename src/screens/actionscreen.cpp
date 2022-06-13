@@ -208,7 +208,7 @@ namespace coffeepot
         if (ImGui::Button("Add Option"))
         {
             Option& newOption = m_ActionTemplate.m_Options.emplace_back();
-            newOption.m_ID = m_ActionTemplate.m_Options.size();
+            newOption.m_ID = static_cast<int32_t>(m_ActionTemplate.m_Options.size());
             newOption.m_ValueInfo.m_Type = InputType::Text;
         }
 
@@ -219,20 +219,26 @@ namespace coffeepot
     {
         ImGui::PushID(&option);
 
+        // First line
         ImGui::TableNextRow();
+
         ImGui::TableSetColumnIndex(0);
 		ImGui::AlignTextToFramePadding();
         ImGui::Bullet(); ImGui::SameLine();
-        int cursonPosX = ImGui::GetCursorPosX();
+        const float cursonPosX = ImGui::GetCursorPosX(); // for alignment
         ImGui::Text("Name");
+
         ImGui::TableSetColumnIndex(1);
         ImGui::InputString("OptionName", option.m_Name);
 
+		// Second line
         ImGui::TableNextRow();
+
         ImGui::TableSetColumnIndex(0);
 		ImGui::AlignTextToFramePadding();
-        ImGui::SetCursorPosX(cursonPosX);
+        ImGui::SetCursorPosX(cursonPosX); // align to previous line
         ImGui::Text("DefaultValue");
+
         ImGui::TableSetColumnIndex(1);
         ImGui::InputString("OptionDefaultValue", option.m_ValueInfo.m_Default);
 
