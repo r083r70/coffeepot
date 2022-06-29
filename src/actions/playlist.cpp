@@ -15,12 +15,6 @@ namespace coffeepot
         m_NextActionIndex = 0;
     }
 
-    bool Playlist::startExecution()
-    {
-        m_NextActionIndex = 0;
-        return hasNextAction();
-    }
-
     bool Playlist::hasNextAction() const
     {
         return m_NextActionIndex < m_Actions.size();
@@ -30,5 +24,11 @@ namespace coffeepot
     {
         assert(hasNextAction());
         return m_Actions[m_NextActionIndex++];
-    }
+	}
+
+	bool Playlist::startExecution()
+	{
+		m_NextActionIndex = 0;
+		return hasNextAction();
+	}
 }

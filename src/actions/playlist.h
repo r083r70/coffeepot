@@ -7,14 +7,16 @@ namespace coffeepot
 {
     class Playlist
     {
-    public:
+	public:
+        const std::vector<Action>& getActions() const { return m_Actions; }
         void addAction(const Action& action);
         void removeAllAction();
 
-        bool startExecution();
-
+		size_t getNextActionIndex() const { return m_NextActionIndex; }
         bool hasNextAction() const;
-        const Action& getNextAction();
+		const Action& getNextAction();
+
+		bool startExecution();
 
     private:
         std::vector<Action> m_Actions;

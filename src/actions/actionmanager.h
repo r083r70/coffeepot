@@ -19,8 +19,9 @@ namespace coffeepot
 
         std::vector<Action>& getAllActions() { return m_Actions; }
         void addAction(Action& action) { m_Actions.push_back(action); }
-
         bool executeAction(const Action& action);
+
+        const Playlist& getCurrentPlaylist() const { return m_CurrentPlaylist; }
 
         const char* readOutput();
 

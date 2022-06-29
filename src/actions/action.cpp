@@ -89,9 +89,8 @@ namespace coffeepot
     const std::string& ActionExecutor::getOptionValueByID(int32_t id) const
     {
         const std::vector<Option>& options = m_Action.m_Options;
-        for (auto it = options.cbegin(); it != options.cend(); ++it)
+        for (const auto& option : options)
         {
-            const Option& option = *it;
             if (option.m_ID == id)
                 return option.m_Value;
         }

@@ -1,16 +1,19 @@
 
 #include "app.h"
 
-#include "screens/actionscreen.h"
-#include "screens/logscreen.h"
-
 #include "events.h"
 #include "log.h"
+#include "screens/actionscreen.h"
+#include "screens/logscreen.h"
+#include "screens/playlistscreen.h"
+#include "serializer.h"
 
 namespace coffeepot
 {
     App::App()
-        : m_Title("Coffeepot")
+		: m_Window()
+        , m_ImGuiClient()
+        , m_Title("coffeepot")
         , m_Width(720)
         , m_Height(480)
         , b_ShouldClose(false)
@@ -19,6 +22,7 @@ namespace coffeepot
     bool App::init()
     {
         Log::init();
+        Serializer::loadWindowSize(m_Width, m_Height);
 
         m_Window.setEventCallback(std::bind(&App::onEvent, this, std::placeholders::_1));
         if (!m_Window.init(m_Title, m_Width, m_Height))
@@ -28,8 +32,9 @@ namespace coffeepot
             return false;
 
         m_Screens.push_back(new MainMenuBarScreen());
-        m_Screens.push_back(new LogScreen());
-        m_Screens.push_back(new ActionsScreen());
+		m_Screens.push_back(new LogScreen());
+		m_Screens.push_back(new ActionsScreen());
+		m_Screens.push_back(new PlaylistScreen());
         
         ActionsManager::get()->init();
 
@@ -50,7 +55,9 @@ namespace coffeepot
             m_ImGuiClient.postTick();
 
             ActionsManager::get()->tick();
-        }
+		}
+
+		Serializer::saveWindowSize(m_Width, m_Height);
 
         ActionsManager::get()->deinit();
         
