@@ -13,11 +13,7 @@ namespace coffeepot
 		static bool saveActions(const std::vector<Action>& actions);
 		static bool loadActions(std::vector<Action>& actions);
 
-    protected:
-        static YAML::Node createActionNode(const Action& action);
-        static Action createAction(const YAML::Node& actionNode);
-
-		static YAML::Node createOptionNode(const Option& option);
-        static Option createOption(const YAML::Node& optionNode);
+		static bool saveWindowSize(int32_t width, int32_t height);
+		static bool loadWindowSize(int32_t& width, int32_t& height);
 	};
 }
