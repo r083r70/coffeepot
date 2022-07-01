@@ -5,7 +5,7 @@
 #include "log.h"
 #include "screens/actionscreen.h"
 #include "screens/logscreen.h"
-#include "screens/playlistscreen.h"
+#include "screens/executionscreen.h"
 #include "serializer.h"
 
 namespace coffeepot
@@ -34,7 +34,7 @@ namespace coffeepot
         m_Screens.push_back(new MainMenuBarScreen());
 		m_Screens.push_back(new LogScreen());
 		m_Screens.push_back(new ActionsScreen());
-		m_Screens.push_back(new PlaylistScreen());
+		m_Screens.push_back(new ExecutionScreen());
         
         ActionsManager::get()->init();
 

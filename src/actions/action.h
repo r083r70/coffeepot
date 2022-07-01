@@ -48,7 +48,7 @@ namespace coffeepot
         ~ActionExecutor() { stop(); }
 
         bool start();
-        bool update(char* output);
+        bool update(char* output, size_t size);
         void stop();
 
     protected:

@@ -1,6 +1,6 @@
 
 #include "playlist.h"
-#include <assert.h>
+#include <cassert>
 
 namespace coffeepot
 {

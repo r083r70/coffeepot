@@ -1,12 +1,12 @@
 
-#include "playlistscreen.h"
+#include "executionscreen.h"
 
 #include "actions/actionmanager.h"
 #include "imgui.h"
 
 namespace coffeepot
 {
-	void PlaylistScreen::tick()
+	void ExecutionScreen::tick()
 	{
 		if (!ImGui::Begin("Playlist"))
 			return;
@@ -24,7 +24,7 @@ namespace coffeepot
 		ImGui::End();
 	}
 
-	void PlaylistScreen::listAction(const Action& action, bool bExecuted)
+	void ExecutionScreen::listAction(const Action& action, bool bExecuted)
 	{
 		ImGui::PushID("bExecuted");
 		ImGui::Checkbox("", &bExecuted);

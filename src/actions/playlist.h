@@ -8,6 +8,8 @@ namespace coffeepot
     class Playlist
     {
 	public:
+        Playlist() = default;
+
         const std::vector<Action>& getActions() const { return m_Actions; }
         void addAction(const Action& action);
         void removeAllAction();

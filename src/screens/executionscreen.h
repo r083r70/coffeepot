@@ -5,7 +5,7 @@
 
 namespace coffeepot
 {
-	class PlaylistScreen : public Screen
+	class ExecutionScreen : public Screen
 	{
 	public:
 		virtual void tick() override;

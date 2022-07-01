@@ -11,10 +11,8 @@ namespace coffeepot
         if (!ImGui::Begin("Log"))
             return;
 
-        if (const char* output = ActionsManager::get()->readOutput())
-            m_Buffer.append(output);
-
-        ImGui::TextUnformatted(m_Buffer.c_str());
+        ActionsManager::get()->readOutput(m_TextBuffer);
+        ImGui::TextUnformatted(m_TextBuffer.c_str());
         ImGui::SetScrollHereY(1.f);
 
         ImGui::End();

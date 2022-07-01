@@ -3,7 +3,7 @@
 #include "core/log.h"
 
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include <cstdio>
 
 namespace coffeepot
@@ -39,9 +39,9 @@ namespace coffeepot
         return m_Pipe != nullptr;
     }
 
-    bool ActionExecutor::update(char* output)
+    bool ActionExecutor::update(char* output, size_t size)
     {
-        if (fgets(output, 128, m_Pipe) != nullptr)            
+        if (fgets(output, size, m_Pipe) != nullptr)
             return true;
 
         stop();

@@ -11,6 +11,6 @@ namespace coffeepot
         virtual void tick() override;
 
     private:
-        ImGuiTextBuffer m_Buffer;
+        ImGuiTextBuffer m_TextBuffer;
     };
 }
