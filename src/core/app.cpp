@@ -1,15 +1,19 @@
 
 #include "app.h"
 
+#include "actions/actionmanager.h"
 #include "events.h"
 #include "log.h"
 #include "screens/actionscreen.h"
-#include "screens/logscreen.h"
 #include "screens/executionscreen.h"
+#include "screens/logscreen.h"
+#include "screens/playlistscreen.h"
 #include "serializer.h"
 
 namespace coffeepot
 {
+	App* App::s_Instance = nullptr;
+
     App::App()
 		: m_Window()
         , m_ImGuiClient()
@@ -21,6 +25,8 @@ namespace coffeepot
 
     bool App::init()
     {
+        s_Instance = this;
+
         Log::init();
         Serializer::loadWindowSize(m_Width, m_Height);
 
@@ -32,9 +38,17 @@ namespace coffeepot
             return false;
 
         m_Screens.push_back(new MainMenuBarScreen());
-		m_Screens.push_back(new LogScreen());
 		m_Screens.push_back(new ActionsScreen());
 		m_Screens.push_back(new ExecutionScreen());
+		m_Screens.push_back(new LogScreen());
+		m_Screens.push_back(new PlaylistScreen());
+
+        Serializer::loadActions(m_Actions);
+
+        Playlist& p = m_Playlists.emplace_back();
+        p.m_Name = "PTest";
+        for (auto& a : m_Actions)
+            p.addAction(a);
         
         ActionsManager::get()->init();
 
@@ -60,6 +74,8 @@ namespace coffeepot
 		Serializer::saveWindowSize(m_Width, m_Height);
 
         ActionsManager::get()->deinit();
+        m_Actions.clear();
+        m_Playlists.clear();
         
         std::for_each(m_Screens.begin(), m_Screens.end(), [](auto& Elem) { delete Elem; Elem = nullptr; });
         m_Screens.clear();

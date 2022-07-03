@@ -11,6 +11,8 @@ namespace coffeepot
         Playlist() = default;
 
         const std::vector<Action>& getActions() const { return m_Actions; }
+        std::vector<Action>& getActions() { return m_Actions; }
+
         void addAction(const Action& action);
         void removeAllAction();
 
@@ -19,6 +21,9 @@ namespace coffeepot
 		const Action& getNextAction();
 
 		bool startExecution();
+
+    public:
+        std::string m_Name;
 
     private:
         std::vector<Action> m_Actions;

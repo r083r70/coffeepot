@@ -23,7 +23,7 @@ namespace coffeepot
         void renderFooter();
 
     private:
-        bool m_CreatingAction = false;
+        bool b_CreatingAction = false;
         Action m_ActionTemplate;
     };
 }

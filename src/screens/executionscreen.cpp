@@ -8,7 +8,7 @@ namespace coffeepot
 {
 	void ExecutionScreen::tick()
 	{
-		if (!ImGui::Begin("Playlist"))
+		if (!ImGui::Begin("Execution"))
 			return;
 
 		const Playlist& playlist = ActionsManager::get()->getCurrentPlaylist();

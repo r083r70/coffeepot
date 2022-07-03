@@ -30,9 +30,8 @@ namespace coffeepot
 
         void tick();
 
-        std::vector<Action>& getAllActions() { return m_Actions; }
-        void addAction(Action& action) { m_Actions.push_back(action); }
         bool executeAction(const Action& action);
+        bool executePlaylist(const Playlist& playlist);
 
         const Playlist& getCurrentPlaylist() const { return m_CurrentPlaylist; }
 
@@ -44,8 +43,7 @@ namespace coffeepot
         bool startNextAction();
 
     private:
-        static ActionsManager* m_Instance;
-        std::vector<Action> m_Actions;
+        static ActionsManager* s_Instance;
 
         std::unique_ptr<ActionExecutor> m_Executor;
         Playlist m_CurrentPlaylist;

@@ -12,6 +12,7 @@
 
 namespace coffeepot
 {
+	std::mutex g_ExecutorMutex;
 	std::mutex g_PlaylistMutex;
 	std::mutex g_OutputMutex;
 
@@ -26,6 +27,7 @@ namespace coffeepot
         if (actionManager->b_Terminating) // just reading > no lock
             return false;
 
+        const std::lock_guard<std::mutex> executorLock(g_ExecutorMutex);
 		auto& executor = actionManager->m_Executor;
 		if (!executor)
 		{
@@ -48,28 +50,26 @@ namespace coffeepot
         return true;
 	}
 
-	ActionsManager* ActionsManager::m_Instance = nullptr;
+	ActionsManager* ActionsManager::s_Instance = nullptr;
 
 	ActionsManager* ActionsManager::get()
     {
-        if (!m_Instance)
-            m_Instance = new ActionsManager();
+        if (!s_Instance)
+            s_Instance = new ActionsManager();
         
-        return m_Instance;
+        return s_Instance;
     }
 
     bool ActionsManager::init()
     {
         m_ThreadedActionManager = std::thread{ ThreadedActionManager{} };
-        return Serializer::loadActions(m_Actions);
+        return true;
     }
 
     void ActionsManager::deinit()
     {
         b_Terminating = true;
         m_ThreadedActionManager.join();
-
-        m_Actions.clear();
     }
 
     void ActionsManager::tick() {}
@@ -83,6 +83,21 @@ namespace coffeepot
 
         m_CurrentPlaylist.addAction(action);
         return true;
+    }
+
+    bool ActionsManager::executePlaylist(const Playlist& playlist)
+    {
+        const std::lock_guard<std::mutex> executorLock(g_ExecutorMutex);
+		const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
+
+        if (m_Executor)
+        {
+            m_Executor->stop();
+            m_Executor.reset();
+        }
+
+        m_CurrentPlaylist = playlist;
+        return m_CurrentPlaylist.startExecution();
     }
 
 	void ActionsManager::readOutput(ImGuiTextBuffer& textOutput)
