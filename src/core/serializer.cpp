@@ -1,11 +1,10 @@
 
 #include "serializer.h"
 
-#include "actions/actionmanager.h"
 #include "core/log.h"
-
 #include "yaml-cpp/yaml.h"
 
+#include<cassert>
 #include<fstream>
 
 namespace YAML
@@ -112,6 +111,11 @@ namespace YAML
 
 namespace coffeepot
 {
+    bool Serializer::loadActionsAndPlaylists(std::vector<Action>& actions, std::vector<Playlist>& playlist)
+    {
+        return loadActions(actions) && loadPlaylists(actions, playlist);
+    }
+
 	bool Serializer::saveActions(const std::vector<Action>& actions)
 	{
         YAML::Node rootNode;        
@@ -125,7 +129,7 @@ namespace coffeepot
 
 	bool Serializer::loadActions(std::vector<Action>& actions)
 	{
-        YAML::Node rootNode = YAML::LoadFile("actions.yaml");
+        const YAML::Node rootNode = YAML::LoadFile("actions.yaml");
         const auto& actionsNode = rootNode["actions"];
 
         actions.clear();
@@ -141,6 +145,103 @@ namespace coffeepot
         return true;
 	}
 
+    bool Serializer::savePlaylists(const std::vector<Playlist>& playlists)
+    {
+        YAML::Node rootNode;
+
+        const auto createOptionNode = [](const Option& option) -> YAML::Node
+        {
+            YAML::Node optionNode;
+            optionNode["id"] = option.m_ID;
+            optionNode["value"] = option.m_Value;
+            return optionNode;
+        };
+
+        const auto createActionNode = [&createOptionNode](const Action& action) -> YAML::Node
+        {
+            YAML::Node actionNode;
+            actionNode["id"] = action.m_ID;
+
+            for (auto& option : action.m_Options)
+                actionNode["options"].push_back(createOptionNode(option));
+
+            return actionNode;
+        };
+
+        const auto createPlaylistNode = [&createActionNode](const Playlist& playlist) -> YAML::Node
+        {
+            YAML::Node playlistNode;
+            playlistNode["name"] = playlist.m_Name;
+
+            for (auto& action : playlist.getActions())
+                playlistNode["actions"].push_back(createActionNode(action));
+
+            return playlistNode;
+        };
+
+        for (const auto& playlist : playlists)
+            rootNode["playlists"].push_back(createPlaylistNode(playlist));
+
+        std::ofstream fout("playlists.yaml");
+        fout << rootNode << std::endl;
+        return true;
+    }
+
+    bool Serializer::loadPlaylists(const std::vector<Action>& actions, std::vector<Playlist>& playlists)
+    {
+        const YAML::Node rootNode = YAML::LoadFile("playlists.yaml");
+        const auto& playlistsNode = rootNode["playlists"];
+
+        playlists.clear();
+        playlists.reserve(playlistsNode.size());
+        CP_TRACE("Found {} playlists", playlistsNode.size());
+
+        const auto createAction = [&actions](const YAML::Node& actionNode) -> Action
+        {
+            const int actionId = actionNode["id"].as<int>();
+            auto baseAction = std::find_if(actions.begin(), actions.end(), [actionId](const auto& elem) { return elem.m_ID == actionId; });
+
+            assert(baseAction != actions.end());
+            Action action = *baseAction;
+
+			const auto& optionsNode = actionNode["options"];
+            if (!optionsNode)
+                return action;
+
+            auto& options = action.m_Options;
+            for (auto it = optionsNode.begin(); it != optionsNode.end(); ++it)
+            {
+                const YAML::Node& optionNode = *it;
+                const int optionId = optionNode["id"].as<int>();
+                auto option = std::find_if(options.begin(), options.end(), [optionId](const auto& elem) { return elem.m_ID == optionId; });
+
+                assert(option != options.end());
+                option->m_Value = optionNode["value"].as<std::string>();
+            }
+
+            return action;
+        };
+
+        for (auto it = playlistsNode.begin(); it != playlistsNode.end(); ++it)
+		{
+            const YAML::Node playlistNode = *it;
+
+            Playlist playlist;
+            playlist.m_Name = playlistNode["name"].as<std::string>();
+
+			const auto& actionsNode = playlistNode["actions"];
+			if (!actionsNode) // Empty Playlist > Ignore
+                continue;
+                
+            for (auto yt = actionsNode.begin(); yt != actionsNode.end(); ++yt)
+                playlist.addAction(createAction(*yt));
+
+			playlists.push_back(playlist);
+		}
+
+        return true;
+    }
+
 	bool Serializer::saveWindowSize(int32_t width, int32_t height)
 	{
 		YAML::Node rootNode;
@@ -154,7 +255,7 @@ namespace coffeepot
 
 	bool Serializer::loadWindowSize(int32_t& width, int32_t& height)
 	{
-		YAML::Node rootNode = YAML::LoadFile("coffeepot.yaml");
+		const YAML::Node rootNode = YAML::LoadFile("coffeepot.yaml");
 		width = rootNode["width"].as<int32_t>();
 		height = rootNode["height"].as<int32_t>();
 		return true;

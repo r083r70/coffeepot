@@ -43,13 +43,7 @@ namespace coffeepot
 		m_Screens.push_back(new LogScreen());
 		m_Screens.push_back(new PlaylistScreen());
 
-        Serializer::loadActions(m_Actions);
-
-        Playlist& p = m_Playlists.emplace_back();
-        p.m_Name = "PTest";
-        for (auto& a : m_Actions)
-            p.addAction(a);
-        
+        Serializer::loadActionsAndPlaylists(m_Actions, m_Playlists);
         ActionsManager::get()->init();
 
         return true;
@@ -97,5 +91,15 @@ namespace coffeepot
             m_Height = windowResizedEvent.m_Height;
 		} break;
         }
+    }
+
+    void App::saveActions()
+    {
+        Serializer::saveActions(m_Actions);
+    }
+
+    void App::savePlaylists()
+    {
+        Serializer::savePlaylists(m_Playlists);
     }
 }

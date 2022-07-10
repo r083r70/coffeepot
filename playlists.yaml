@@ -1,0 +1,18 @@
+playlists:
+  - name: PTest
+    actions:
+      - id: 1
+      - id: 2
+      - id: 3
+      - id: 4
+        options:
+          - id: 0
+            value: patch
+      - id: 5
+        options:
+          - id: 0
+            value: Three
+      - id: 6
+        options:
+          - id: 0
+            value: ""

@@ -49,19 +49,20 @@ namespace coffeepot
             if (bufferFreeSize <= 0) // Buffer is full, retry later
                 return true;
 
-            // Update executor - Gather output
+            // Update Executor - Gather output
 			char* tmpOutput = m_OutputBuffer.data();
-            if (!executor->update(tmpOutput, bufferFreeSize))
-                executor.reset();
-
-            // Copy output into the Buffer
+            if (executor->update(tmpOutput, bufferFreeSize))
             {
+                // Copy output to ActionsManager's Buffer
 			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
 
                 char* output = actionManager->m_OutputBuffer.data(); 
                 const size_t outputLength = strlen(output);
-
                 memcpy(&output[outputLength], tmpOutput, bufferFreeSize);
+            }
+            else
+            {
+                executor.reset(); // Invalidate Executor
             }
         }
 

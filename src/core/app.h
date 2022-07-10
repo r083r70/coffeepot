@@ -19,6 +19,7 @@ namespace coffeepot
 
         static App* get() { return s_Instance; }
 
+        // Life cycle
         bool init();
         void run();
         void onEvent(Event& event);
@@ -27,9 +28,13 @@ namespace coffeepot
         inline std::vector<Action>& getAllActions() { return m_Actions; }
         inline void addAction(const Action& action) { m_Actions.push_back(action); }
         
+        void saveActions();
+        
         // Playlists
         inline std::vector<Playlist>& getAllPlaylists() { return m_Playlists; }
         inline void addPlaylist(const Playlist& playlist) { m_Playlists.push_back(playlist); }
+
+        void savePlaylists();
 
     private:
         static App* s_Instance;
