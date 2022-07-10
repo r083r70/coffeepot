@@ -11,6 +11,11 @@ namespace coffeepot
         virtual void tick() override;
 
     private:
+        void renderLogger();
+        void renderFooter();
+
+    private:
         ImGuiTextBuffer m_TextBuffer;
+        bool b_AutoScrollDown;
     };
 }

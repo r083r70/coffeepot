@@ -37,14 +37,32 @@ namespace coffeepot
 		}
         else
         {
-			const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
-			char* output = actionManager->m_OutputBuffer.data();
+            size_t bufferFreeSize = 0; // Comput Buffer free size
+            {
+			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
+                
+                const auto outputBuffer = actionManager->m_OutputBuffer; 
+                const size_t outputLength = strlen(outputBuffer.data());
+                bufferFreeSize = outputBuffer.size() - outputLength;
+            }
 
-            const size_t length = strlen(output);
-            const size_t bufferFreeSize = actionManager->m_OutputBuffer.size() - length;
+            if (bufferFreeSize <= 0) // Buffer is full, retry later
+                return true;
 
-            if (bufferFreeSize > 0 && !executor->update(&output[length], bufferFreeSize))
+            // Update executor - Gather output
+			char* tmpOutput = m_OutputBuffer.data();
+            if (!executor->update(tmpOutput, bufferFreeSize))
                 executor.reset();
+
+            // Copy output into the Buffer
+            {
+			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
+
+                char* output = actionManager->m_OutputBuffer.data(); 
+                const size_t outputLength = strlen(output);
+
+                memcpy(&output[outputLength], tmpOutput, bufferFreeSize);
+            }
         }
 
         return true;

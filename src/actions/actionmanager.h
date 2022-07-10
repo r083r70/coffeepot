@@ -18,6 +18,9 @@ namespace coffeepot
 
     private:
         bool update();
+
+    private:
+        std::array<char, 2048> m_OutputBuffer;
     };
 
     class ActionsManager
