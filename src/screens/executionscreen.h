@@ -5,10 +5,14 @@
 
 namespace coffeepot
 {
-	class ExecutionScreen : public Screen
+	class ExecutionScreen : public ScreenWithFooter
 	{
-	public:
-		virtual void tick() override;
+    public:
+        ExecutionScreen() : ScreenWithFooter("Execution") {}
+
+    protected:
+        virtual void tickContent() override;
+        virtual void tickFooter() override;
 
 	private:
 		void listAction(const Action& action, bool bExecuted);

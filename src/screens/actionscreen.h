@@ -7,10 +7,14 @@
 
 namespace coffeepot
 {
-    class ActionsScreen : public Screen
+    class ActionsScreen : public ScreenWithFooter
     {
     public:
-        virtual void tick() override;
+        ActionsScreen();
+
+    protected:
+        virtual void tickContent() override;
+        virtual void tickFooter() override;
 
     private:
         void renderActions();
@@ -19,8 +23,6 @@ namespace coffeepot
 
         void renderActionBuilder();
         void renderOptionBuilder(Option& option);
-
-        void renderFooter();
 
     private:
         bool b_CreatingAction = false;

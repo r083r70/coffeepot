@@ -34,29 +34,14 @@ namespace coffeepot
     struct Action
     {
     public:
+        std::string createFullCommand() const;
+        const std::string& getOptionValueByID(int32_t id) const;
+
+    public:
         int32_t m_ID;
         std::string m_Name;
 
         std::string m_Command;
         std::vector<Option> m_Options;
-    };
-
-    class ActionExecutor
-    {
-    public:
-        ActionExecutor(const Action& action);
-        ~ActionExecutor() { stop(); }
-
-        bool start();
-        bool update(char* output, size_t size);
-        void stop();
-
-    protected:
-        std::string createFullCommand() const;
-        const std::string& getOptionValueByID(int32_t id) const;
-
-    private:
-        Action m_Action;
-        FILE* m_Pipe;
     };
 }

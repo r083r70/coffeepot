@@ -5,25 +5,14 @@
 #include "core/log.h"
 
 namespace coffeepot
-{
-    void LogScreen::tick()
-    {
-        if (!ImGui::Begin("Log"))
-            return;
+{   
+    LogScreen::LogScreen()
+        : ScreenWithFooter("Log")
+        , m_TextBuffer()
+        , b_AutoScrollDown(false)
+    {}
 
-        const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
-        const float footerHeight = ImGui::GetFrameHeight() + itemSpacing;
-        if (ImGui::BeginChild("Actions", ImVec2(0, -footerHeight)))
-        {
-            renderLogger();
-            ImGui::EndChild();
-        }
-
-        renderFooter();
-        ImGui::End();
-    }
-
-    void LogScreen::renderLogger()
+    void LogScreen::tickContent()
     {
         ActionsManager::get()->readOutput(m_TextBuffer);
         ImGui::TextUnformatted(m_TextBuffer.c_str());
@@ -32,10 +21,8 @@ namespace coffeepot
             ImGui::SetScrollHereY(1.f);
     }
 
-    void LogScreen::renderFooter()
+    void LogScreen::tickFooter()
     {
-        ImGui::Separator();
-
         if (ImGui::Button("Clear"))
             m_TextBuffer.clear();
 

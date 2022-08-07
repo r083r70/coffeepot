@@ -11,25 +11,31 @@
 
 namespace coffeepot
 {
-    void ActionsScreen::tick()
+     ActionsScreen::ActionsScreen()
+        : ScreenWithFooter("Actions")
+        , b_CreatingAction(false)
+        , m_ActionTemplate()
+     {}
+
+    void ActionsScreen::tickContent()
     {
-        if (!ImGui::Begin("Actions"))
-            return;
-        
-        const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
-        const float footerHeight = ImGui::GetFrameHeight() + itemSpacing;
-        if (ImGui::BeginChild("Actions", ImVec2(0, -footerHeight)))
+        if (b_CreatingAction)
+            renderActionBuilder();
+        else
+            renderActions();
+    }
+    
+    void ActionsScreen::tickFooter()
+    {
+        switch (ImGui::BuilderFooter("Action", b_CreatingAction))
         {
-            if (b_CreatingAction)
-                renderActionBuilder();
-            else
-                renderActions();
-
-            ImGui::EndChild();
+            case ImGui::BuilderFooterResult::Save:
+                App::get()->addAction(m_ActionTemplate);
+                break;
+            case ImGui::BuilderFooterResult::Start:
+                m_ActionTemplate = Action{};
+                break;
         }
-
-        renderFooter();
-        ImGui::End();
     }
     
     void ActionsScreen::renderActions()
@@ -124,18 +130,5 @@ namespace coffeepot
         ImGui::InputString("OptionDefaultValue", option.m_ValueInfo.m_Default);
 
         ImGui::PopID();
-    }
-
-    void ActionsScreen::renderFooter()
-    {
-        switch (ImGui::BuilderFooter("Action", b_CreatingAction))
-        {
-            case ImGui::BuilderFooterResult::Save:
-                App::get()->addAction(m_ActionTemplate);
-                break;
-            case ImGui::BuilderFooterResult::Start:
-                m_ActionTemplate = Action{};
-                break;
-        }
     }
 }

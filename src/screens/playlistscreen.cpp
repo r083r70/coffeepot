@@ -10,25 +10,31 @@
 
 namespace coffeepot
 {
-    void PlaylistScreen::tick()
+    PlaylistScreen::PlaylistScreen()
+        : ScreenWithFooter("Playlists")
+        , b_CreatingPlaylist(false)
+        , m_PlaylistTemplate()
+    {}
+
+    void PlaylistScreen::tickContent()
     {
-        if (!ImGui::Begin("Playlist"))
-            return;
+        if (b_CreatingPlaylist)
+            renderPlaylistBuilder();
+        else
+            renderPlaylists();
+    }
 
-        const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
-        const float footerHeight = ImGui::GetFrameHeight() + itemSpacing;
-        if (ImGui::BeginChild("Playlists", ImVec2(0, -footerHeight)))
+    void PlaylistScreen::tickFooter()
+    {
+        switch (ImGui::BuilderFooter("Playlist", b_CreatingPlaylist))
         {
-            if (b_CreatingPlaylist)
-                renderPlaylistBuilder();
-            else
-                renderPlaylists();
-
-            ImGui::EndChild();
+            case ImGui::BuilderFooterResult::Save:
+                App::get()->addPlaylist(m_PlaylistTemplate);
+                break;
+            case ImGui::BuilderFooterResult::Start:
+                m_PlaylistTemplate = Playlist{};
+                break;
         }
-
-        renderFooter();
-        ImGui::End();
     }
     
     void PlaylistScreen::renderPlaylists()
@@ -82,18 +88,5 @@ namespace coffeepot
         }
 
         ImGui::EndCombo();
-    }
-
-    void PlaylistScreen::renderFooter()
-    {
-        switch (ImGui::BuilderFooter("Playlist", b_CreatingPlaylist))
-        {
-            case ImGui::BuilderFooterResult::Save:
-                App::get()->addPlaylist(m_PlaylistTemplate);
-                break;
-            case ImGui::BuilderFooterResult::Start:
-                m_PlaylistTemplate = Playlist{};
-                break;
-        }
     }
 }

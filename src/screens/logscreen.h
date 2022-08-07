@@ -5,14 +5,14 @@
 
 namespace coffeepot
 {
-    class LogScreen : public Screen
+    class LogScreen : public ScreenWithFooter
     {
     public:
-        virtual void tick() override;
+        LogScreen();
 
-    private:
-        void renderLogger();
-        void renderFooter();
+    protected:
+        virtual void tickContent() override;
+        virtual void tickFooter() override;
 
     private:
         ImGuiTextBuffer m_TextBuffer;

@@ -5,10 +5,14 @@
 
 namespace coffeepot
 {
-    class PlaylistScreen : public Screen
+    class PlaylistScreen : public ScreenWithFooter
     {
     public:
-        virtual void tick() override;
+        PlaylistScreen();
+
+    protected:
+        virtual void tickContent() override;
+        virtual void tickFooter() override;
 
     private:
         void renderPlaylists();
@@ -18,8 +22,6 @@ namespace coffeepot
 
         void renderPlaylistBuilder();
         void renderActionSelector();
-
-        void renderFooter();
     
     private:
         bool b_CreatingPlaylist = false;

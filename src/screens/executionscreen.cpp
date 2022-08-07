@@ -6,12 +6,9 @@
 
 namespace coffeepot
 {
-	void ExecutionScreen::tick()
+	void ExecutionScreen::tickContent()
 	{
-		if (!ImGui::Begin("Execution"))
-			return;
-
-		const Playlist& playlist = ActionsManager::get()->getCurrentPlaylist();
+		const Playlist& playlist = ActionsManager::get()->getExecutionPlaylist();
 		size_t nextActionIndex = playlist.getNextActionIndex();
 
 		auto& actions = playlist.getActions();
@@ -20,8 +17,12 @@ namespace coffeepot
 			const bool bExecuted = i < nextActionIndex;
 			listAction(actions[i], bExecuted);
 		}
+    }
 
-		ImGui::End();
+    void ExecutionScreen::tickFooter()
+    {
+        if (ImGui::Button("Kill All"))
+            ActionsManager::get()->killExecution();
 	}
 
 	void ExecutionScreen::listAction(const Action& action, bool bExecuted)
