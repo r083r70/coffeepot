@@ -1,6 +1,5 @@
 
 #include "playlist.h"
-#include "executor.h"
 
 #include <array>
 #include <atomic>
