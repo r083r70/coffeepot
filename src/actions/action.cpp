@@ -6,7 +6,12 @@ namespace coffeepot
 {
     std::string Action::createFullCommand() const
     {
-        std::string result{""};
+#if CP_WINDOWS
+		std::string result{ "cmd /c " };
+#elif CP_LINUX
+		std::string result{ "" };
+#endif
+
         for (auto it = m_Command.cbegin(); it != m_Command.cend(); ++it)
         {
             const char c = *it;

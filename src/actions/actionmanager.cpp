@@ -10,12 +10,13 @@
 #include <cstring>
 #include <mutex>
 
-#include <signal.h>
+#if CP_WINDOWS
+#include <atlconv.h>
+#include <windows.h> 
+#elif CP_LINUX
+#include <csignal>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#if CP_WIN
-#include "process.h"
 #endif
 
 namespace coffeepot
@@ -109,8 +110,15 @@ namespace coffeepot
                 continue;
 
             // Read in the LocalBuffer and later copy in the Output
-            if (fgets(localBuffer.data(), outputFreeSize, m_ExecutionState.m_Pipe))
-            {
+#if CP_WINDOWS
+			DWORD readBytes;
+			if (ReadFile(m_ExecutionState.m_ProcessOutput, localBuffer.data(), outputFreeSize - 1, &readBytes, nullptr))
+			{
+                localBuffer[readBytes] = '\0'; // ReadFile doesnt set Termination char
+#elif CP_LINUX
+			if (fgets(localBuffer.data(), outputFreeSize, m_ExecutionState.m_Pipe))
+			{
+#endif
 			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
 
                 char* output = m_OutputBuffer.data();
@@ -120,7 +128,12 @@ namespace coffeepot
             // Read failed > Action is completed
             else
             {
-                fclose(m_ExecutionState.m_Pipe);
+#if CP_WINDOWS
+				CloseHandle(m_ExecutionState.m_ProcessOutput);
+#elif CP_LINUX
+				fclose(m_ExecutionState.m_Pipe);
+#endif
+
                 stopCurrentAction();
             }
         }
@@ -137,7 +150,41 @@ namespace coffeepot
     }
 
 	bool ActionsManager::startAction(const Action& action)
-    {
+	{
+#if CP_WINDOWS
+		bool bSuccess = true;
+		SECURITY_ATTRIBUTES securityAttributes;
+		securityAttributes.nLength = sizeof(SECURITY_ATTRIBUTES);
+		securityAttributes.bInheritHandle = true;
+		securityAttributes.lpSecurityDescriptor = nullptr;
+
+		HANDLE& outRead = m_ExecutionState.m_ProcessOutput = nullptr;
+        HANDLE outWrite = nullptr;
+		bSuccess = CreatePipe(&outRead, &outWrite, &securityAttributes, 0) && SetHandleInformation(outRead, HANDLE_FLAG_INHERIT, 0);
+		if (!bSuccess)
+			return false;
+
+		PROCESS_INFORMATION& processInformation = m_ExecutionState.m_ProcessInformation;
+		memset(&processInformation, 0, sizeof(PROCESS_INFORMATION));
+
+		STARTUPINFO startupInfo;
+		memset(&startupInfo, 0, sizeof(STARTUPINFO));
+		startupInfo.cb = sizeof(STARTUPINFO);
+		startupInfo.hStdError = outWrite;
+		startupInfo.hStdOutput = outWrite;
+		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
+
+		USES_CONVERSION;
+        const std::string cmd = action.createFullCommand();
+		bSuccess = CreateProcess(nullptr, A2W(cmd.data()), nullptr, nullptr, true, 0, nullptr, nullptr, &startupInfo, &processInformation);
+		if (!bSuccess)
+			return false;
+
+		CloseHandle(outWrite);
+
+		m_ExecutionState.b_Running = true;
+		return true;
+#elif CP_LINUX
         constexpr int READ = 0;
         constexpr int WRITE = 1;
 
@@ -160,13 +207,7 @@ namespace coffeepot
             setpgid(m_ExecutionState.m_PID, m_ExecutionState.m_PID);
 
             const std::string cmd = action.createFullCommand();
-
-#if CP_WIN
-            _execl("C::\\WINDOWS\\SYSTEM32\\CMD.EXE", "cmd.exe", "/c", cmd.c_str(), nullptr);
-#elif CP_LINUX
             execl("/bin/sh", "/bin/sh", "-c", cmd.c_str(), nullptr);
-#endif
-
             exit(1);
         }
         else
@@ -176,7 +217,8 @@ namespace coffeepot
 
         m_ExecutionState.m_Pipe = fdopen(fd[READ], "r");
         m_ExecutionState.b_Running = true;
-        return true;
+		return true;
+#endif
     }
 
     void ActionsManager::emptyExecutionPlaylist()
@@ -192,10 +234,21 @@ namespace coffeepot
 
         const std::lock_guard<std::mutex> lock(g_ActionMutex);
 
-        CP_DEBUG("Killing {}", m_ExecutionState.m_PID);
+#if CP_WINDOWS
+		CP_DEBUG("Killing {}", m_ExecutionState.m_ProcessInformation.dwProcessId);
+		m_ExecutionState.b_Running = false;
 
-        m_ExecutionState.b_Running = false;
+		TerminateProcess(m_ExecutionState.m_ProcessInformation.hProcess, 0);
+		WaitForSingleObject(m_ExecutionState.m_ProcessInformation.hProcess, INFINITE);
+
+		CloseHandle(m_ExecutionState.m_ProcessInformation.hProcess);
+		CloseHandle(m_ExecutionState.m_ProcessInformation.hThread);
+#elif CP_LINUX
+		CP_DEBUG("Killing {}", m_ExecutionState.m_PID);
+		m_ExecutionState.b_Running = false;
+
         kill(-m_ExecutionState.m_PID, SIGKILL);
         waitpid(m_ExecutionState.m_PID, nullptr, 0);
+#endif
     }
 }

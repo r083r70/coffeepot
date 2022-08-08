@@ -49,7 +49,7 @@ project "coffeepot"
 
     filter "system:windows"
         systemversion "latest"
-        defines { "CP_WIN", "YAML_CPP_STATIC_DEFINE" }
+        defines { "CP_WINDOWS", "YAML_CPP_STATIC_DEFINE" }
 
     filter "system:linux"
         systemversion "latest"

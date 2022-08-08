@@ -7,14 +7,24 @@
 #include <thread>
 #include <vector>
 
+#if CP_WINDOWS
+#include <wtypes.h>
+#endif
+
 struct ImGuiTextBuffer;
 
 namespace coffeepot
 {
     struct ExecutionState
     {
-        pid_t m_PID = -1;
-        FILE* m_Pipe = nullptr;
+#if CP_WINDOWS
+		PROCESS_INFORMATION m_ProcessInformation;
+		HANDLE m_ProcessOutput;
+#elif CP_LINUX
+		pid_t m_PID = -1;
+		FILE* m_Pipe = nullptr;
+#endif
+
         std::atomic<bool> b_Running = false;
     };
 
