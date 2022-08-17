@@ -4,6 +4,7 @@
 #include "actions/actionmanager.h"
 #include "events.h"
 #include "log.h"
+#include "platform.h"
 #include "screens/actionscreen.h"
 #include "screens/executionscreen.h"
 #include "screens/logscreen.h"
@@ -14,21 +15,26 @@ namespace coffeepot
 {
 	App* App::s_Instance = nullptr;
 
-    App::App()
-		: m_Window()
+	App::App(BasePlatform* platform)
+		: m_Platform(platform)
+        , m_Window()
         , m_ImGuiClient()
         , m_Title("coffeepot")
         , m_Width(720)
         , m_Height(480)
         , b_ShouldClose(false)
-    {}
+    {
+        assert(m_Platform != nullptr);
+	}
 
-    bool App::init()
+	bool App::init()
     {
         s_Instance = this;
-
+        
         Log::init();
         Serializer::loadWindowSize(m_Width, m_Height);
+
+		m_Platform->init();
 
         m_Window.setEventCallback(std::bind(&App::onEvent, this, std::placeholders::_1));
         if (!m_Window.init(m_Title, m_Width, m_Height))
@@ -52,7 +58,9 @@ namespace coffeepot
     void App::run()
     {
         while (!b_ShouldClose)
-        {
+		{
+            m_Platform->tick();
+
             m_Window.tick();
 
             m_ImGuiClient.preTick(m_Width, m_Height);
@@ -76,6 +84,8 @@ namespace coffeepot
         
         m_ImGuiClient.deinit();
         m_Window.deinit();
+
+		m_Platform->deinit();
     }
     
     void App::onEvent(Event& event)
@@ -83,7 +93,7 @@ namespace coffeepot
         switch (event.getType())
         {
         case coffeepot::EventType::WindowClosed:
-            b_ShouldClose = true;
+    		b_ShouldClose = !m_Platform->onWindowClosed(); // Try handle it via Platform, otherwise close the Application
             break;
         case coffeepot::EventType::WindowResized: {
             const auto& windowResizedEvent = static_cast<coffeepot::WindowResizedEvent&>(event);

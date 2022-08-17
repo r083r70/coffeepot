@@ -176,7 +176,7 @@ namespace coffeepot
 
 		USES_CONVERSION;
         const std::string cmd = action.createFullCommand();
-		bSuccess = CreateProcess(nullptr, A2W(cmd.data()), nullptr, nullptr, true, 0, nullptr, nullptr, &startupInfo, &processInformation);
+		bSuccess = CreateProcess(nullptr, A2W(cmd.data()), nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &startupInfo, &processInformation);
 		if (!bSuccess)
 			return false;
 

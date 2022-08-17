@@ -13,7 +13,12 @@ include "thirdparty/imgui"
 include "thirdparty/yaml-cpp"
 
 project "coffeepot"
-    kind "ConsoleApp"
+    filter "Debug"
+        kind "ConsoleApp"
+
+    filter "Release"
+        kind "WindowedApp" -- Applicable only to Windows
+
     language "C++"
     cppdialect "C++17"
 
@@ -47,20 +52,26 @@ project "coffeepot"
         "thirdparty/imgui/backends/imgui_impl_opengl3.cpp"
     }
 
+    filter "Debug"
+        defines { "DEBUG" }
+        symbols "On"
+
+    filter "Release"
+        defines { "NDEBUG" }
+        optimize "On"
+
     filter "system:windows"
         systemversion "latest"
         defines { "CP_WINDOWS", "YAML_CPP_STATIC_DEFINE" }
+
+        includedirs { "res/" }
+        files {
+            "res/coffeepot.rc",
+            "res/resources.h",
+            'res/**.ico'
+        }
 
     filter "system:linux"
         systemversion "latest"
         links { "pthread", "dl" }
         defines { "CP_LINUX" }
-
-    filter "configurations:Debug"
-        defines { "DEBUG" }
-        symbols "On"
-
-    filter "configurations:Release"
-        defines { "NDEBUG" }
-        optimize "On"
-

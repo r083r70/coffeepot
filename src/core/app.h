@@ -10,12 +10,13 @@
 
 namespace coffeepot
 {
+	class BasePlatform;
     class Event;
 
     class App
     {
     public:
-        App();
+        App(BasePlatform* platform);
 
         static App* get() { return s_Instance; }
 
@@ -38,6 +39,8 @@ namespace coffeepot
 
     private:
         static App* s_Instance;
+
+        BasePlatform* m_Platform;
 
         Window m_Window;
         ImGuiClient m_ImGuiClient;

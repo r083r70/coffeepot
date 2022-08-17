@@ -38,7 +38,7 @@ void coffeepot::MainMenuBarScreen::tick()
 
 void coffeepot::ScreenWithFooter::tick()
 {
-    if (!ImGui::Begin(m_Name, nullptr))
+    if (!ImGui::Begin(m_Name, nullptr, ImGuiWindowFlags_NoScrollbar))
         return;
 
     const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
