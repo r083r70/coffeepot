@@ -1,7 +1,6 @@
 
 #include "window.h"
 
-#include "events.h"
 #include "log.h"
 
 #include "glad/glad.h"
@@ -17,9 +16,10 @@ namespace coffeepot
         if (m_Handle == nullptr)
             return false;
         
-        glfwSetWindowUserPointer(m_Handle, &m_User);
         glfwMakeContextCurrent(m_Handle);
         setupEventCallbacks();
+
+        EventDispatcher::get()->subscribe(this);
 
         const int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         return status;
@@ -32,7 +32,6 @@ namespace coffeepot
         glfwSetWindowSizeCallback(m_Handle, nullptr);
         glfwSetWindowCloseCallback(m_Handle, nullptr);
         
-        glfwSetWindowUserPointer(m_Handle, nullptr);
         glfwDestroyWindow(m_Handle);
         m_Handle = nullptr;
 
@@ -50,27 +49,40 @@ namespace coffeepot
         glfwGetWindowSize(m_Handle, &width, &height);
     }
 
-    void Window::setupEventCallbacks()
+    bool Window::onEvent(const Event& event)
+	{
+		switch (event.getType())
+		{
+		case coffeepot::EventType::WindowClosed:
+			hide(); break;
+		case coffeepot::EventType::NotifyIconInteracted:
+            show(); break;
+		}
+
+		return false; // Dont consume the Events
+	}
+
+	void Window::hide()
+	{
+		glfwHideWindow(m_Handle);
+	}
+
+	void Window::show()
+	{
+		glfwShowWindow(m_Handle);
+	}
+
+	void Window::setupEventCallbacks()
     {
-        glfwSetWindowCloseCallback(getHandle(), [](GLFWwindow* window)
-        {
-            User& user = *static_cast<User*>(glfwGetWindowUserPointer(window));
-            WindowClosedEvent event{};
-            user.onEvent(event);
+        glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* window)
+		{
+			EventDispatcher::get()->createEvent(EventType::WindowClosed);
         });
 
-        glfwSetWindowSizeCallback(getHandle(), [](GLFWwindow* window, int width, int height)
-        {
-            User& user = *static_cast<User*>(glfwGetWindowUserPointer(window));
-            WindowResizedEvent event{width, height};
-            user.onEvent(event);
-        });
-
-        glfwSetCharCallback(getHandle(), [](GLFWwindow* window, unsigned int codepoint)
-        {
-            User& user = *static_cast<User*>(glfwGetWindowUserPointer(window));
-            CharEvent event{codepoint};
-            user.onEvent(event);
+        glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow* window, int width, int height)
+		{
+			auto eventData = new WindowResizedEventData{ width, height };
+            EventDispatcher::get()->createEvent(EventType::WindowResized, eventData);
         });
     }
 }

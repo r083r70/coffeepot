@@ -3,6 +3,7 @@
 #include "actions/action.h"
 #include "actions/playlist.h"
 #include "imguiclient.h"
+#include "eventdispatcher.h"
 #include "screens/screens.h"
 #include "window.h"
 
@@ -13,7 +14,7 @@ namespace coffeepot
 	class BasePlatform;
     class Event;
 
-    class App
+    class App : public EventSubscriber
     {
     public:
         App(BasePlatform* platform);
@@ -23,7 +24,8 @@ namespace coffeepot
         // Life cycle
         bool init();
         void run();
-        void onEvent(Event& event);
+
+        virtual bool onEvent(const Event& event) override;
 
         // Actions
         inline std::vector<Action>& getAllActions() { return m_Actions; }
@@ -42,6 +44,7 @@ namespace coffeepot
 
         BasePlatform* m_Platform;
 
+        EventDispatcher m_EventDispacher;
         Window m_Window;
         ImGuiClient m_ImGuiClient;
 

@@ -11,7 +11,7 @@ int WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
 #elif CP_WINDOWS && NDEBUG
 int WinMain()
 #else
-int main()
+int main(void)
 #endif
 {
     coffeepot::BasePlatform* platform = IF_ELSE_NOTIFYICON(

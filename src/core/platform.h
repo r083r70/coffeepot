@@ -9,13 +9,17 @@
 #define IF_ELSE_NOTIFYICON(ifCode, elseCode) elseCode
 #endif
 
+#include "eventdispatcher.h"
+
 #if WITH_NOTIFYICON
 #include <windows.h >
 #endif
 
 namespace coffeepot
 {
-	class BasePlatform
+	class Event;
+
+	class BasePlatform : public EventSubscriber
 	{
 	public:
 		BasePlatform() = default;
@@ -25,8 +29,7 @@ namespace coffeepot
 		virtual void deinit() {}
 		virtual void tick() {}
 
-		virtual bool onWindowClosed() { return false; }
-		virtual bool onWindowOpened() { return false; }
+		virtual bool onEvent(const Event& event) override { return false; };
 	};
 
 #if WITH_NOTIFYICON
@@ -39,8 +42,7 @@ namespace coffeepot
 		virtual void deinit() override;
 		virtual void tick() override;
 
-		virtual bool onWindowClosed() override;
-		virtual bool onWindowOpened() override;
+		virtual bool onEvent(const Event& event) override;
 
 		bool HandleNotifyIconAction(LPARAM action);
 

@@ -11,6 +11,8 @@
 #include "screens/playlistscreen.h"
 #include "serializer.h"
 
+#include "GLFW/glfw3.h" // TEMP
+
 namespace coffeepot
 {
 	App* App::s_Instance = nullptr;
@@ -29,14 +31,16 @@ namespace coffeepot
 
 	bool App::init()
     {
-        s_Instance = this;
-        
-        Log::init();
-        Serializer::loadWindowSize(m_Width, m_Height);
+		s_Instance = this;
 
+		Log::init();
+
+		m_EventDispacher.init();
+		m_EventDispacher.subscribe(this);
+        
 		m_Platform->init();
 
-        m_Window.setEventCallback(std::bind(&App::onEvent, this, std::placeholders::_1));
+		Serializer::loadWindowSize(m_Width, m_Height);
         if (!m_Window.init(m_Title, m_Width, m_Height))
             return false;
         
@@ -59,6 +63,8 @@ namespace coffeepot
     {
         while (!b_ShouldClose)
 		{
+			m_EventDispacher.tick();
+
             m_Platform->tick();
 
             m_Window.tick();
@@ -67,7 +73,7 @@ namespace coffeepot
             m_ImGuiClient.tick();
 
             std::for_each(m_Screens.begin(), m_Screens.end(), [](auto Elem) { Elem->tick(); });
-            
+
             m_ImGuiClient.postTick();
 
             ActionsManager::get()->tick();
@@ -86,21 +92,23 @@ namespace coffeepot
         m_Window.deinit();
 
 		m_Platform->deinit();
+		m_EventDispacher.deinit();
     }
     
-    void App::onEvent(Event& event)
+    bool App::onEvent(const Event& event)
     {
         switch (event.getType())
         {
         case coffeepot::EventType::WindowClosed:
-    		b_ShouldClose = !m_Platform->onWindowClosed(); // Try handle it via Platform, otherwise close the Application
-            break;
-        case coffeepot::EventType::WindowResized: {
-            const auto& windowResizedEvent = static_cast<coffeepot::WindowResizedEvent&>(event);
-            m_Width = windowResizedEvent.m_Width;
-            m_Height = windowResizedEvent.m_Height;
-		} break;
+            b_ShouldClose = true;
+            return true;
+        case coffeepot::EventType::WindowResized:
+            m_Width = event.getData<WindowResizedEventData>()->m_Width;
+            m_Height = event.getData<WindowResizedEventData>()->m_Height;
+			return true;
         }
+
+		return false;
     }
 
     void App::saveActions()

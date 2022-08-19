@@ -6,48 +6,32 @@ namespace coffeepot
 {
     enum class EventType
     {
-        WindowClosed,
-        WindowResized,
-        Char
-    };
+        None,
+		WindowClosed,
+		WindowResized,
+		NotifyIconInteracted
+	};
 
     class Event
     {
     public:
-        virtual EventType getType() const = 0;
-        virtual const char *toString() const = 0;
-    };
+        Event(EventType eventType, void* eventData) : m_Type(eventType), m_Data(eventData) {}
+        ~Event() { delete m_Data; }
 
-    class WindowClosedEvent : public Event
-    {
-    public:
-        WindowClosedEvent() = default;
-        virtual EventType getType() const override { return EventType::WindowClosed; }
-        virtual const char *toString() const override { return "WindowClosedEvent"; }
+        EventType getType() const { return m_Type; }
+		void* getRawData() const { return m_Data; }
+
+        template<class T>
+		T* getData() const { return static_cast<T*>(m_Data); }
+
+	private:
+		EventType m_Type;
+		void* m_Data;
     };
     
-    class WindowResizedEvent : public Event
+    struct WindowResizedEventData
     {
-    public:
-        WindowResizedEvent(int32_t width, int32_t height) : m_Width(width), m_Height(height) {}
-        virtual EventType getType() const override { return EventType::WindowResized; }
-        virtual const char *toString() const override { return "WindowResizedEvent"; }
-
-    public:
         int32_t m_Width;
         int32_t m_Height;
-    };
-
-    class CharEvent : public Event
-    {
-    public:
-        CharEvent(unsigned int keycode) : m_Keycode(keycode) {}
-        virtual EventType getType() const override { return EventType::Char; }
-        virtual const char *toString() const override { return "CharEvent"; }
-
-    public:
-        unsigned int  m_Keycode;
-    };
-
-    using EventCallbackFn = std::function<void(Event&)>;
+	};
 }

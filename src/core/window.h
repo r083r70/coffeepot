@@ -1,12 +1,12 @@
 #pragma once
 
-#include "events.h"
+#include "eventdispatcher.h"
 
 struct GLFWwindow;
 
 namespace coffeepot
 {
-    class Window
+    class Window : public EventSubscriber
     {
     public:
         bool init(const char* title, int width, int height);
@@ -15,19 +15,17 @@ namespace coffeepot
         void tick();
 
         inline GLFWwindow* getHandle() const { return m_Handle; }
-        inline void setEventCallback(EventCallbackFn callback) { m_User.onEvent = callback; }
-        
         void getSize(int& width, int& height) const;
+
+		virtual bool onEvent(const Event& event) override;
     
     private:
         void setupEventCallbacks();
 
-    private:
-        struct User {
-            EventCallbackFn onEvent;
-        };
+		void hide();
+		void show();
 
+    private:
         GLFWwindow *m_Handle;
-        User m_User;
     };
 }

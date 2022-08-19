@@ -13,11 +13,8 @@ include "thirdparty/imgui"
 include "thirdparty/yaml-cpp"
 
 project "coffeepot"
-    filter "Debug"
-        kind "ConsoleApp"
-
-    filter "Release"
-        kind "WindowedApp" -- Applicable only to Windows
+    -- kind "ConsoleApp"
+    kind "WindowedApp" -- For Windows Release
 
     language "C++"
     cppdialect "C++17"

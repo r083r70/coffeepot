@@ -7,6 +7,9 @@
 
 #include "resources.h"
 
+#include "app.h"
+#include "eventdispatcher.h"
+
 #include <cassert>
 #include <commctrl.h>
 #include <shellapi.h>
@@ -43,6 +46,8 @@ namespace coffeepot
 
 		CreateWindowClass(g_WindowClassName);
 		m_WindowHandle = CreatePlatformWindow(g_WindowClassName, g_Title);
+
+		EventDispatcher::get()->subscribe(this);
 	}
 
 	void WindowsPlatform::deinit()
@@ -52,21 +57,22 @@ namespace coffeepot
 
 	void WindowsPlatform::tick()
 	{
-		if (GetMessage(&m_Message, nullptr, 0, 0))
+		if (PeekMessage(&m_Message, m_WindowHandle, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&m_Message);
 			DispatchMessage(&m_Message);
 		}
 	}
 
-	bool WindowsPlatform::onWindowClosed()
+	bool WindowsPlatform::onEvent(const Event& event)
 	{
-		return CreateNotifyIcon();
-	}
+		if (event.getType() == EventType::WindowClosed)
+			return CreateNotifyIcon();
+		
+		if (event.getType() == EventType::NotifyIconInteracted)
+			return DeleteNotifyIcon();
 
-	bool WindowsPlatform::onWindowOpened()
-	{
-		return DeleteNotifyIcon();
+		return false;
 	}
 
 	bool WindowsPlatform::HandleNotifyIconAction(LPARAM action)
@@ -74,7 +80,7 @@ namespace coffeepot
 		if (LOWORD(action) != NIN_SELECT)
 			return false;
 
-		// Create Event (?)
+		EventDispatcher::get()->createEvent(EventType::NotifyIconInteracted);
 		return true;
 	}
 
