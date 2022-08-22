@@ -16,6 +16,7 @@ namespace coffeepot
 
         inline GLFWwindow* getHandle() const { return m_Handle; }
         void getSize(int& width, int& height) const;
+        bool IsVisible() const { return m_Visible; }
 
 		virtual bool onEvent(const Event& event) override;
     
@@ -27,5 +28,6 @@ namespace coffeepot
 
     private:
         GLFWwindow *m_Handle;
+        bool m_Visible;
     };
 }

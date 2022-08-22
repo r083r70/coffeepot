@@ -7,12 +7,13 @@
 #include "imgui.h"
 
 #include <cassert>
+#include <chrono>
 #include <cstring>
 #include <mutex>
 
 #if CP_WINDOWS
 #include <atlconv.h>
-#include <windows.h> 
+#include <windows.h>
 #elif CP_LINUX
 #include <csignal>
 #include <sys/wait.h>
@@ -91,7 +92,9 @@ namespace coffeepot
     {
         std::array<char, 2048> localBuffer;
         while (!b_Ending)
-        {
+		{
+            std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Sleep half a second to avoid overusing the Locks
+
             if (!m_ExecutionState.b_Running)
                 maybeStartNextAction();
             

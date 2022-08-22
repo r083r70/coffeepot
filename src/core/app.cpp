@@ -67,14 +67,16 @@ namespace coffeepot
 
             m_Platform->tick();
 
-            m_Window.tick();
+			m_Window.tick();
+            if (m_Window.IsVisible())
+			{
+				m_ImGuiClient.preTick(m_Width, m_Height);
+				m_ImGuiClient.tick();
 
-            m_ImGuiClient.preTick(m_Width, m_Height);
-            m_ImGuiClient.tick();
+				std::for_each(m_Screens.begin(), m_Screens.end(), [](auto Elem) { Elem->tick(); });
 
-            std::for_each(m_Screens.begin(), m_Screens.end(), [](auto Elem) { Elem->tick(); });
-
-            m_ImGuiClient.postTick();
+				m_ImGuiClient.postTick();
+			}
 
             ActionsManager::get()->tick();
 		}

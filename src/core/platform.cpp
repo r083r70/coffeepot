@@ -47,6 +47,8 @@ namespace coffeepot
 		CreateWindowClass(g_WindowClassName);
 		m_WindowHandle = CreatePlatformWindow(g_WindowClassName, g_Title);
 
+		m_NotifyIconVisible = false;
+
 		EventDispatcher::get()->subscribe(this);
 	}
 
@@ -57,8 +59,12 @@ namespace coffeepot
 
 	void WindowsPlatform::tick()
 	{
-		if (PeekMessage(&m_Message, m_WindowHandle, 0, 0, PM_REMOVE))
+		if (!m_NotifyIconVisible)
+			return;
+
+		if (PeekMessage(&m_Message, m_WindowHandle, 0, 0, 0))
 		{
+			GetMessage(&m_Message, m_WindowHandle, 0, 0);
 			TranslateMessage(&m_Message);
 			DispatchMessage(&m_Message);
 		}
@@ -112,11 +118,14 @@ namespace coffeepot
 		wcscpy_s(notifyIconData.szTip, tipText);
 		notifyIconData.uCallbackMessage = WMAPP_NOTIFYCALLBACK;
 
-		Shell_NotifyIcon(NIM_ADD, &notifyIconData);
+		bool result = Shell_NotifyIcon(NIM_ADD, &notifyIconData);
 
 		// Version
 		notifyIconData.uVersion = NOTIFYICON_VERSION_4;
-		return Shell_NotifyIcon(NIM_SETVERSION, &notifyIconData);
+		result &= Shell_NotifyIcon(NIM_SETVERSION, &notifyIconData);
+
+		m_NotifyIconVisible = result;
+		return result;
 	}
 
 	bool WindowsPlatform::DeleteNotifyIcon()
@@ -125,7 +134,10 @@ namespace coffeepot
 		notifyIconData.hWnd = m_WindowHandle;
 		notifyIconData.uID = g_NotifyIconId;
 
-		return Shell_NotifyIcon(NIM_DELETE, &notifyIconData);
+		const bool result = Shell_NotifyIcon(NIM_DELETE, &notifyIconData);
+		m_NotifyIconVisible = false;
+
+		return result;
 	}
 }
 #endif

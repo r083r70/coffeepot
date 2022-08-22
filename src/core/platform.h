@@ -59,6 +59,8 @@ namespace coffeepot
 		HINSTANCE m_Instance;
 		HWND m_WindowHandle;
 		MSG m_Message;
+
+		bool m_NotifyIconVisible;
 	};
 #endif
 }

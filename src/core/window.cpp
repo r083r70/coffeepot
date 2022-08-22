@@ -15,7 +15,10 @@ namespace coffeepot
         m_Handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
         if (m_Handle == nullptr)
             return false;
-        
+
+		m_Visible = true;
+
+		glfwSetWindowUserPointer(m_Handle, this);
         glfwMakeContextCurrent(m_Handle);
         setupEventCallbacks();
 
@@ -29,8 +32,9 @@ namespace coffeepot
     {
         // Remove callbacks
         glfwSetCharCallback(m_Handle, nullptr);
-        glfwSetWindowSizeCallback(m_Handle, nullptr);
-        glfwSetWindowCloseCallback(m_Handle, nullptr);
+		glfwSetWindowSizeCallback(m_Handle, nullptr);
+		glfwSetWindowCloseCallback(m_Handle, nullptr);
+		glfwSetWindowIconifyCallback(m_Handle, nullptr);
         
         glfwDestroyWindow(m_Handle);
         m_Handle = nullptr;
@@ -41,7 +45,9 @@ namespace coffeepot
     void Window::tick()
     {
         glfwPollEvents();
-        glfwSwapBuffers(m_Handle);
+
+        if (m_Visible)
+            glfwSwapBuffers(m_Handle);
     }
 
     void Window::getSize(int& width, int& height) const
@@ -65,19 +71,26 @@ namespace coffeepot
 	void Window::hide()
 	{
 		glfwHideWindow(m_Handle);
+        m_Visible = false;
 	}
 
 	void Window::show()
 	{
 		glfwShowWindow(m_Handle);
+		m_Visible = true;
 	}
 
 	void Window::setupEventCallbacks()
-    {
-        glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* window)
+	{
+		glfwSetWindowIconifyCallback(m_Handle, [](GLFWwindow* window, int iconified)
+		{
+			static_cast<Window*>(glfwGetWindowUserPointer(window))->m_Visible = iconified != GLFW_TRUE;
+		});
+
+		glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* window)
 		{
 			EventDispatcher::get()->createEvent(EventType::WindowClosed);
-        });
+		});
 
         glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow* window, int width, int height)
 		{
