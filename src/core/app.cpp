@@ -100,7 +100,8 @@ namespace coffeepot
     bool App::onEvent(const Event& event)
     {
         switch (event.getType())
-        {
+		{
+		case coffeepot::EventType::Terminate:
         case coffeepot::EventType::WindowClosed:
             b_ShouldClose = true;
             return true;

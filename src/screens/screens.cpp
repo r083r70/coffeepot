@@ -2,6 +2,7 @@
 #include "screens.h"
 
 #include "core/app.h"
+#include "core/eventdispatcher.h"
 #include "core/log.h"
 
 #include "imgui.h"
@@ -10,6 +11,14 @@ void coffeepot::MainMenuBarScreen::tick()
 {
     if (!ImGui::BeginMainMenuBar())
         return;
+
+    if (ImGui::BeginMenu("Coffeepot"))
+	{
+        if (ImGui::MenuItem("Exit"))
+            EventDispatcher::get()->createEvent(EventType::Terminate);
+
+		ImGui::EndMenu();
+    }
 
     if (ImGui::BeginMenu("Actions"))
     {

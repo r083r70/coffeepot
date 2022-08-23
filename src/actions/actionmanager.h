@@ -20,6 +20,7 @@ namespace coffeepot
 #if CP_WINDOWS
 		PROCESS_INFORMATION m_ProcessInformation;
 		HANDLE m_ProcessOutput;
+		HANDLE m_Job;
 #elif CP_LINUX
 		pid_t m_PID = -1;
 		FILE* m_Pipe = nullptr;

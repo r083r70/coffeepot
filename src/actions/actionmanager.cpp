@@ -155,6 +155,7 @@ namespace coffeepot
 	bool ActionsManager::startAction(const Action& action)
 	{
 #if CP_WINDOWS
+		// Setup Pipes
 		bool bSuccess = true;
 		SECURITY_ATTRIBUTES securityAttributes;
 		securityAttributes.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -177,11 +178,22 @@ namespace coffeepot
 		startupInfo.hStdOutput = outWrite;
 		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
 
+        // Create Job
+		m_ExecutionState.m_Job = CreateJobObject(nullptr, L"coffeepot_job");
+		JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobObjectInformation{};
+        jobObjectInformation.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+		SetInformationJobObject(m_ExecutionState.m_Job, JobObjectExtendedLimitInformation, &jobObjectInformation, sizeof(jobObjectInformation));
+
+		// Create suspended Process
 		USES_CONVERSION;
         const std::string cmd = action.createFullCommand();
-		bSuccess = CreateProcess(nullptr, A2W(cmd.data()), nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &startupInfo, &processInformation);
+		bSuccess = CreateProcess(nullptr, A2W(cmd.data()), nullptr, nullptr, true, CREATE_NO_WINDOW | CREATE_SUSPENDED, nullptr, nullptr, &startupInfo, &processInformation);
 		if (!bSuccess)
 			return false;
+
+		// Assign process to Job and Resume it
+		AssignProcessToJobObject(m_ExecutionState.m_Job, processInformation.hProcess);
+		ResumeThread(processInformation.hThread);
 
 		CloseHandle(outWrite);
 
@@ -246,6 +258,7 @@ namespace coffeepot
 
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hProcess);
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hThread);
+		CloseHandle(m_ExecutionState.m_Job);
 #elif CP_LINUX
 		CP_DEBUG("Killing {}", m_ExecutionState.m_PID);
 		m_ExecutionState.b_Running = false;

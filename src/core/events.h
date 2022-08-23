@@ -7,6 +7,7 @@ namespace coffeepot
     enum class EventType
     {
         None,
+        Terminate,
 		WindowClosed,
 		WindowResized,
 		NotifyIconInteracted
