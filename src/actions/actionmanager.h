@@ -42,6 +42,8 @@ namespace coffeepot
 
         bool executeAction(const Action& action);
         bool executePlaylist(const Playlist& playlist);
+
+        bool isExecutingAction() const { return m_ExecutionState.b_Running; }
         void killExecution();
 
         void readOutput(ImGuiTextBuffer& textOutput);
