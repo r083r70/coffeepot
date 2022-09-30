@@ -17,3 +17,6 @@ thirdparty/glad/glad
 # Make files
 Makefile
 *.make
+
+# Res files
+*.aps
