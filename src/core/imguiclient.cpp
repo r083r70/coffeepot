@@ -1,6 +1,7 @@
 
 #include "imguiclient.h"
 
+#include "fa_icons.h"
 #include "log.h"
 #include "window.h"
 
@@ -17,23 +18,34 @@ namespace coffeepot
     }
 
     bool ImGuiClient::init(const Window& window)
-    {
-        ImGui::CreateContext();
-        ImGui::StyleColorsClassic();
+	{
+		ImGui::CreateContext();
+		ImGui::StyleColorsClassic();
 
-        ImGuiIO& io = ImGui::GetIO();
+		ImGuiIO& io = ImGui::GetIO();
+
+        // Setup Fonts
+		const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+		ImFontConfig icons_config;
+		icons_config.MergeMode = true;
+		icons_config.GlyphMinAdvanceX = 16.0f;
+        icons_config.PixelSnapH = true;
+		io.Fonts->AddFontDefault();
+		io.Fonts->AddFontFromFileTTF("res/fa-solid-900.otf", 11.0f, &icons_config, icons_ranges);
+        io.Fonts->Build();
+
+		// Setup Docking
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+		// Setup Size
         int32_t width, height;
 		window.getSize(width, height);
 		io.DisplaySize = CreateImGuiVector(width, height);
 
+		// Setup OpenGL
         bool status = ImGui_ImplGlfw_InitForOpenGL(window.getHandle(), true);
         status &= ImGui_ImplOpenGL3_Init("#version 300 es");
-
-        m_PrevTickTime = 0;
-
         return status;
     }
 

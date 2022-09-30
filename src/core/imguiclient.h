@@ -13,8 +13,5 @@ namespace coffeepot
         void preTick(int32_t width, int32_t height);
         void tick();
         void postTick();
-
-    private:
-        time_t m_PrevTickTime;
     };
 };
