@@ -13,8 +13,7 @@ include "thirdparty/imgui"
 include "thirdparty/yaml-cpp"
 
 project "coffeepot"
-    -- kind "ConsoleApp"
-    kind "WindowedApp" -- For Windows Release
+    kind "ConsoleApp"
 
     language "C++"
     cppdialect "C++17"
@@ -23,6 +22,7 @@ project "coffeepot"
     objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
     includedirs {
+        "res/",
         "src/",
         "thirdparty/glad/include",
         "thirdparty/glfw/include",
@@ -41,6 +41,9 @@ project "coffeepot"
     files {
         "src/**.h",
         "src/**.cpp",
+
+        -- Resources
+        "res/fa_icons.h",
 
         -- ImGui files
         "thirdparty/imgui/backends/imgui_impl_glfw.h",

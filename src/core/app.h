@@ -4,6 +4,7 @@
 #include "actions/playlist.h"
 #include "imguiclient.h"
 #include "eventdispatcher.h"
+#include "platform.h"
 #include "screens/screens.h"
 #include "window.h"
 
@@ -11,13 +12,12 @@
 
 namespace coffeepot
 {
-	class BasePlatform;
     class Event;
 
     class App : public EventSubscriber
     {
     public:
-        App(BasePlatform* platform);
+        App();
 
         static App* get() { return s_Instance; }
 
@@ -42,7 +42,7 @@ namespace coffeepot
     private:
         static App* s_Instance;
 
-        BasePlatform* m_Platform;
+        Platform m_Platform;
 
         EventDispatcher m_EventDispacher;
         Window m_Window;

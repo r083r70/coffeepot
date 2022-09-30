@@ -14,35 +14,38 @@
 #include <commctrl.h>
 #include <shellapi.h>
 
-namespace coffeepot
+namespace Windows
 {
+	coffeepot::Platform* g_Platform = nullptr;
 	constexpr u_int WMAPP_NOTIFYCALLBACK = WM_APP + 100;
-	constexpr u_int g_NotifyIconId = 42069;
-
-	WindowsPlatform* g_WindowsPlatform = nullptr;
 
 	LRESULT CALLBACK WndProc(HWND window, u_int message, WPARAM wParam, LPARAM lParam)
 	{
 		if (message == WMAPP_NOTIFYCALLBACK)
 		{
-			assert(g_WindowsPlatform != nullptr);
-			g_WindowsPlatform->HandleNotifyIconAction(lParam);
+			assert(g_Platform != nullptr);
+			g_Platform->HandleNotifyIconAction(lParam);
 		}
 
 		return DefWindowProc(window, message, wParam, lParam);
 	}
+}
 
-	WindowsPlatform::WindowsPlatform(const HINSTANCE& instance)
-		: BasePlatform()
-		, m_Instance(instance)
-	{ }
+namespace coffeepot
+{
+	constexpr u_int g_NotifyIconId = 42069;
 
-	void WindowsPlatform::init()
+	Platform::Platform()
+	{
+		m_Instance = static_cast<HINSTANCE>(GetModuleHandle(nullptr));
+	}
+
+	void Platform::init()
 	{
 		const wchar_t g_WindowClassName[] = L"WindowClass";
 		const wchar_t g_Title[] = L"Coffeepot";
 
-		g_WindowsPlatform = this;
+		Windows::g_Platform = this;
 
 		CreateWindowClass(g_WindowClassName);
 		m_WindowHandle = CreatePlatformWindow(g_WindowClassName, g_Title);
@@ -52,12 +55,13 @@ namespace coffeepot
 		EventDispatcher::get()->subscribe(this);
 	}
 
-	void WindowsPlatform::deinit()
+	void Platform::deinit()
 	{
 		DestroyWindow(m_WindowHandle);
+		Windows::g_Platform = nullptr;
 	}
 
-	void WindowsPlatform::tick()
+	void Platform::tick()
 	{
 		if (!m_NotifyIconVisible)
 			return;
@@ -70,7 +74,7 @@ namespace coffeepot
 		}
 	}
 
-	bool WindowsPlatform::onEvent(const Event& event)
+	bool Platform::onEvent(const Event& event)
 	{
 		if (event.getType() == EventType::WindowClosed)
 			return CreateNotifyIcon();
@@ -81,7 +85,7 @@ namespace coffeepot
 		return false;
 	}
 
-	bool WindowsPlatform::HandleNotifyIconAction(LPARAM action)
+	bool Platform::HandleNotifyIconAction(LPARAM action)
 	{
 		if (LOWORD(action) != NIN_SELECT)
 			return false;
@@ -90,22 +94,22 @@ namespace coffeepot
 		return true;
 	}
 
-	void WindowsPlatform::CreateWindowClass(const wchar_t* windowClassName)
+	void Platform::CreateWindowClass(const wchar_t* windowClassName)
 	{
 		WNDCLASSEX windowClass = { sizeof(windowClass) };
 		windowClass.style = CS_HREDRAW | CS_VREDRAW;
-		windowClass.lpfnWndProc = WndProc;
+		windowClass.lpfnWndProc = Windows::WndProc;
 		windowClass.hInstance = m_Instance;
 		windowClass.lpszClassName = windowClassName;
 		RegisterClassEx(&windowClass);
 	}
 
-	HWND WindowsPlatform::CreatePlatformWindow(const wchar_t* windowClassName, const wchar_t* windowTitle)
+	HWND Platform::CreatePlatformWindow(const wchar_t* windowClassName, const wchar_t* windowTitle)
 	{
 		return CreateWindow(windowClassName, windowTitle, 0, 0, 0, 0, 0, nullptr, nullptr, m_Instance, nullptr);
 	}
 
-	bool WindowsPlatform::CreateNotifyIcon()
+	bool Platform::CreateNotifyIcon()
 	{
 		wchar_t const tipText[] = L"Coffeepot";
 
@@ -116,19 +120,19 @@ namespace coffeepot
 		notifyIconData.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE | NIF_SHOWTIP;
 		LoadIconMetric(m_Instance, MAKEINTRESOURCE(IDI_COFFEEPOT), LIM_SMALL, &notifyIconData.hIcon);
 		wcscpy_s(notifyIconData.szTip, tipText);
-		notifyIconData.uCallbackMessage = WMAPP_NOTIFYCALLBACK;
+		notifyIconData.uCallbackMessage = Windows::WMAPP_NOTIFYCALLBACK;
 
-		bool result = Shell_NotifyIcon(NIM_ADD, &notifyIconData);
+		bool result = Shell_NotifyIcon(NIM_ADD, &notifyIconData) == TRUE;
 
 		// Version
 		notifyIconData.uVersion = NOTIFYICON_VERSION_4;
-		result &= Shell_NotifyIcon(NIM_SETVERSION, &notifyIconData);
+		result &= (Shell_NotifyIcon(NIM_SETVERSION, &notifyIconData) == TRUE);
 
 		m_NotifyIconVisible = result;
 		return result;
 	}
 
-	bool WindowsPlatform::DeleteNotifyIcon()
+	bool Platform::DeleteNotifyIcon()
 	{
 		NOTIFYICONDATA notifyIconData{ sizeof(notifyIconData) };
 		notifyIconData.hWnd = m_WindowHandle;
@@ -139,5 +143,16 @@ namespace coffeepot
 
 		return result;
 	}
+}
+#else
+namespace coffeepot
+{
+	Platform::Platform() { }
+
+	void Platform::init() { }
+	void Platform::deinit() { }
+	void Platform::tick() { }
+
+	bool Platform::onEvent(const Event& event) { return false; }
 }
 #endif

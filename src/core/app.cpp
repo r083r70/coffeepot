@@ -17,17 +17,15 @@ namespace coffeepot
 {
 	App* App::s_Instance = nullptr;
 
-	App::App(BasePlatform* platform)
-		: m_Platform(platform)
+	App::App()
+		: m_Platform()
         , m_Window()
         , m_ImGuiClient()
         , m_Title("coffeepot")
         , m_Width(720)
         , m_Height(480)
         , b_ShouldClose(false)
-    {
-        assert(m_Platform != nullptr);
-	}
+    { }
 
 	bool App::init()
     {
@@ -38,7 +36,7 @@ namespace coffeepot
 		m_EventDispacher.init();
 		m_EventDispacher.subscribe(this);
         
-		m_Platform->init();
+		m_Platform.init();
 
 		Serializer::loadWindowSize(m_Width, m_Height);
         if (!m_Window.init(m_Title, m_Width, m_Height))
@@ -65,7 +63,7 @@ namespace coffeepot
 		{
 			m_EventDispacher.tick();
 
-            m_Platform->tick();
+            m_Platform.tick();
 
 			m_Window.tick();
             if (m_Window.IsVisible())
@@ -93,7 +91,7 @@ namespace coffeepot
         m_ImGuiClient.deinit();
         m_Window.deinit();
 
-		m_Platform->deinit();
+		m_Platform.deinit();
 		m_EventDispacher.deinit();
     }
     

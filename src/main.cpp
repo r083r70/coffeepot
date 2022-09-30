@@ -1,25 +1,17 @@
 
 #include "core/app.h"
-#include "core/platform.h"
 
-#if WITH_NOTIFYICON
-#include <windows.h>
+#if CP_WINDOWS && NDEBUG
+#include <windows.h >
 #endif
 
-#if WITH_NOTIFYICON
-int WinMain(HINSTANCE instance, HINSTANCE, LPSTR, int)
-#elif CP_WINDOWS && NDEBUG
-int WinMain()
-#else
 int main(void)
-#endif
 {
-    coffeepot::BasePlatform* platform = IF_ELSE_NOTIFYICON(
-        new coffeepot::WindowsPlatform(instance),
-        new coffeepot::BasePlatform()
-    );
+// #if CP_WINDOWS && NDEBUG
+// 	ShowWindow(GetConsoleWindow(), SW_HIDE);
+// #endif
 
-    coffeepot::App app{ platform };
+    coffeepot::App app;
     if (app.init())
         app.run();
     
