@@ -50,8 +50,8 @@ void coffeepot::ScreenWithFooter::tick()
     if (!ImGui::Begin(m_Name, nullptr, ImGuiWindowFlags_NoScrollbar))
         return;
 
-    const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
-    const float footerHeight = ImGui::GetFrameHeight() + itemSpacing;
+	const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
+    const float footerHeight = ImGui::GetFrameHeight() + itemSpacing * 2;
     if (ImGui::BeginChild("Content", ImVec2(0, -footerHeight)))
     {
         tickContent();
