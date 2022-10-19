@@ -14,32 +14,13 @@ void coffeepot::MainMenuBarScreen::tick()
 
     if (ImGui::BeginMenu("Coffeepot"))
 	{
+        if (ImGui::MenuItem("Refresh"))
+            App::get()->refreshActionsAndPlaylists();
+
         if (ImGui::MenuItem("Exit"))
             EventDispatcher::get()->createEvent(EventType::Terminate);
 
 		ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Actions"))
-    {
-        if (ImGui::MenuItem("Save"))
-            App::get()->saveActions();
-
-        if (ImGui::MenuItem("Reload"))
-            CP_DEBUG("Not implemented");
-
-        ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Playlists"))
-    {
-        if (ImGui::MenuItem("Save"))
-            App::get()->savePlaylists();
-
-        if (ImGui::MenuItem("Reload"))
-            CP_DEBUG("Not implemented");
-
-        ImGui::EndMenu();
     }
     
     ImGui::EndMainMenuBar();

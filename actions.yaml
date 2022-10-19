@@ -10,7 +10,7 @@ actions:
     command: ls -lX
   - id: 4
     name: Git Fetch
-    command: git fetch origin $0
+    command: git fetch origin {}
     options:
       - id: 0
         name: Branch
@@ -32,5 +32,5 @@ actions:
     options:
       - id: 0
         name: option
-        inputType: 1
+        inputType: Checkbox
         default: master

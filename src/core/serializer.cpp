@@ -13,15 +13,13 @@ namespace YAML
     struct convert<coffeepot::InputType>
     {
         static Node encode(const coffeepot::InputType& value)
-        {
-            int intValue = static_cast<int>(value);
-            return Node(intValue);
+		{
+            return Node(coffeepot::InputTypeToString(value));
         }
 
         static bool decode(const Node& node, coffeepot::InputType& value)
-        {
-            const int intValue = node.as<int>();
-            value = static_cast<coffeepot::InputType>(intValue);
+		{
+            value = coffeepot::StringToInputType(node.as<std::string>());
             return true;
         }
 	};

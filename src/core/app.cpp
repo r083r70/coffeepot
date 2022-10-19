@@ -112,13 +112,10 @@ namespace coffeepot
 		return false;
     }
 
-    void App::saveActions()
-    {
-        Serializer::saveActions(m_Actions);
-    }
-
-    void App::savePlaylists()
-    {
-        Serializer::savePlaylists(m_Playlists);
-    }
+	void App::refreshActionsAndPlaylists()
+	{
+		m_Actions.clear();
+        m_Playlists.clear();
+		Serializer::loadActionsAndPlaylists(m_Actions, m_Playlists);
+	}
 }

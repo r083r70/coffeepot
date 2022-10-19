@@ -8,9 +8,13 @@ namespace coffeepot
     enum class InputType
     {
         Text,
+        OptionalText,
         Checkbox,
         ComboBox
     };
+
+	std::string InputTypeToString(InputType value);
+	InputType StringToInputType(std::string value);
     
     struct ValueInfo
     {
