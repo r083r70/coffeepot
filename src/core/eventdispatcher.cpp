@@ -60,6 +60,6 @@ namespace coffeepot
 
 	void EventDispatcher::unsubscribe(EventSubscriber* subscriber)
 	{
-		std::remove(subscribers.begin(), subscribers.end(), subscriber);
+		auto elem = std::remove(subscribers.begin(), subscribers.end(), subscriber);
 	}
 }
