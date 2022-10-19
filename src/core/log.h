@@ -17,7 +17,7 @@ namespace coffeepot
     };
 };
 
-#ifdef DEBUG
+#if DEBUG
 #define CP_TRACE(...)   coffeepot::Log::getLogger()->trace(__VA_ARGS__)
 #define CP_DEBUG(...)   coffeepot::Log::getLogger()->debug(__VA_ARGS__)
 #define CP_INFO(...)    coffeepot::Log::getLogger()->info(__VA_ARGS__)
