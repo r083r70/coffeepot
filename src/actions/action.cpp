@@ -26,11 +26,11 @@ namespace coffeepot
 	InputType StringToInputType(std::string value)
 	{
         if (value == "Text")
-            return InputType::Text;
-        
+			return InputType::Text;
+		if (value == "OptionalText")
+			return InputType::OptionalText;
 		if (value == "Checkbox")
 			return InputType::Checkbox;
-
         if (value == "ComboBox")
             return InputType::ComboBox;
 
@@ -102,14 +102,25 @@ namespace coffeepot
     }
 
     const std::string& Action::getOptionValueByID(int32_t id) const
-    {
+	{
+		static std::string s_Empty;
+
         for (const auto& option : m_Options)
         {
-            if (option.m_ID == id)
-                return option.m_Value;
+            if (option.m_Details.m_ID != id)
+                continue;
+
+            switch (option.m_Details.m_Type)
+            {
+			case InputType::Text:
+			case InputType::ComboBox:
+				return option.m_Value;
+			case InputType::OptionalText:
+			case InputType::Checkbox:
+				return option.b_Enabled ? option.m_Value : s_Empty;
+            }
         }
 
-        static std::string s_Empty;
         return s_Empty;
     }
 }

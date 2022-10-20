@@ -22,7 +22,7 @@ namespace coffeepot
 		void renderOption(Option& option);
 
         void renderActionBuilder();
-        void renderOptionBuilder(Option& option);
+        void renderOptionBuilder(OptionDetails& optionDetails);
 
     private:
         bool b_CreatingAction = false;

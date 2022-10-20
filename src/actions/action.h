@@ -16,23 +16,23 @@ namespace coffeepot
 	std::string InputTypeToString(InputType value);
 	InputType StringToInputType(std::string value);
     
-    struct ValueInfo
+    struct OptionDetails
     {
-    public:
-        InputType m_Type;
+	public:
+		int32_t m_ID = 0;
+		std::string m_Name;
 
-        std::string m_Default;
-        std::vector<std::string> m_Choices;
+        InputType m_Type;
+		std::vector<std::string> m_ValueList;
     };
 
     struct Option
     {
     public:
-        int32_t m_ID;
-        std::string m_Name;
-        std::string m_Value;
+		std::string m_Value;
+		bool b_Enabled = true;
 
-        ValueInfo m_ValueInfo;
+        OptionDetails m_Details;
     };
 
     struct Action

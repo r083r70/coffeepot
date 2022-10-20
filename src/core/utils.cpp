@@ -45,13 +45,12 @@ namespace ImGui
 		ImGui::PopID();
     }
 
-    void Checkbox(const char* label, std::string& value, const std::string& checkableValue)
-    {
-        ImGui::PushID(label);
-        bool bSelected = value == checkableValue;
-        ImGui::Checkbox("", &bSelected);
-        value = bSelected ? checkableValue : "";
-        ImGui::PopID();
+    bool Checkbox(const char* label, bool& bChecked)
+	{
+		ImGui::PushID(label);
+		const bool bPressed = ImGui::Checkbox("", &bChecked);
+		ImGui::PopID();
+        return bPressed;
     }
 
     bool PlaylistTree(coffeepot::Playlist& playlist, bool bCanRun /*= false*/)
@@ -120,7 +119,7 @@ namespace ImGui
 		ImGui::TableSetColumnIndex(0);
 		ImGui::AlignTextToFramePadding();
 		ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		ImGui::TreeNodeEx("OptionName", treeNodeFlags, option.m_Name.c_str());
+		ImGui::TreeNodeEx("OptionName", treeNodeFlags, option.m_Details.m_Name.c_str());
 
 		// > Column 1
 		ImGui::TableSetColumnIndex(1);
@@ -135,23 +134,32 @@ namespace ImGui
 		ImGui::SetNextItemWidth(- buttonSize - tmpItemSpacing);
 
 		// Draw OptionInput
-        switch (option.m_ValueInfo.m_Type)
+        switch (option.m_Details.m_Type)
         {
         case coffeepot::InputType::Text:
-            ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
+			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
+			break;
+		case coffeepot::InputType::OptionalText:
+            if (ImGui::Checkbox("OptionEnabled", option.b_Enabled) && !option.b_Enabled)
+                option.m_Value = "";
+			ImGui::InputString("OptionValue", option.m_Value, option.b_Enabled ? ImGuiInputTextFlags_CharsNoBlank : ImGuiInputTextFlags_ReadOnly);
             break;
-        case coffeepot::InputType::Checkbox:
-            ImGui::Checkbox("OptionValue", option.m_Value, option.m_ValueInfo.m_Default);
+		case coffeepot::InputType::Checkbox:
+            ImGui::Checkbox("OptionEnabled", option.b_Enabled);
+			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_ReadOnly);
             break;
         case coffeepot::InputType::ComboBox:
-            ImGui::ComboBox("OptionValue", option.m_Value, option.m_ValueInfo.m_Choices);
+            ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
             break;
         }
 
 		// Draw Button
 		ImGui::SameLine();
-		if (ImGui::Button("", ImVec2(buttonSize, buttonSize)))
-			option.m_Value = option.m_ValueInfo.m_Default;
+        if (ImGui::Button("", ImVec2(buttonSize, buttonSize)))
+		{
+			option.b_Enabled = true;
+			option.m_Value = option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
+        }
 
 		// Restore ItemSpacing
 		ImGui::GetStyle().ItemSpacing.x = itemSpacing;

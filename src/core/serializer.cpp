@@ -30,41 +30,33 @@ namespace YAML
 		static Node encode(const coffeepot::Option& value)
 		{
 			YAML::Node node;
-			node["id"] = value.m_ID;
-			node["name"] = value.m_Name;
+			node["id"] = value.m_Details.m_ID;
+			node["name"] = value.m_Details.m_Name;
+			node["inputType"] = value.m_Details.m_Type;
 
-			// ValueInfo
-			node["inputType"] = value.m_ValueInfo.m_Type;
-			node["default"] = value.m_ValueInfo.m_Default;
-			for (auto& value : value.m_ValueInfo.m_Choices)
-				node["choices"].push_back(value);
+			for (auto& value : value.m_Details.m_ValueList)
+				node["valueList"].push_back(value);
 
 			return node;
 		}
 
         static bool decode(const Node& node, coffeepot::Option& value)
 		{
-			value.m_ID = node["id"].as<int>();
-			value.m_Name = node["name"].as<std::string>();
+			value.m_Details.m_ID = node["id"].as<int>();
+			value.m_Details.m_Name = node["name"].as<std::string>();
+            value.m_Details.m_Type = node["inputType"].as<coffeepot::InputType>();
 
-			// ValueInfo
-			value.m_ValueInfo.m_Default = node["default"].as<std::string>();
-			if (const auto& choicesNode = node["choices"])
+			if (const auto& choicesNode = node["valueList"])
 			{
-				value.m_ValueInfo.m_Choices.reserve(choicesNode.size());
+				value.m_Details.m_ValueList.reserve(choicesNode.size());
 				for (auto it = choicesNode.begin(); it != choicesNode.end(); ++it)
-					value.m_ValueInfo.m_Choices.push_back(it->Scalar());
+					value.m_Details.m_ValueList.push_back(it->Scalar());
 			}
 
-			const auto& inputTypeNode = node["inputType"];
-			if (inputTypeNode)
-				value.m_ValueInfo.m_Type = inputTypeNode.as<coffeepot::InputType>();
-			else if (value.m_ValueInfo.m_Choices.size() > 0)
-				value.m_ValueInfo.m_Type = coffeepot::InputType::ComboBox;
-			else
-				value.m_ValueInfo.m_Type = coffeepot::InputType::Text;
+            // Init CheckboxValue
+            if (value.m_Details.m_Type == coffeepot::InputType::Checkbox && !value.m_Details.m_ValueList.empty())
+                value.m_Value = value.m_Details.m_ValueList[0];
 
-			value.m_Value = value.m_ValueInfo.m_Default;
 			return true;
         }
 	};
@@ -150,7 +142,7 @@ namespace coffeepot
         const auto createOptionNode = [](const Option& option) -> YAML::Node
         {
             YAML::Node optionNode;
-            optionNode["id"] = option.m_ID;
+            optionNode["id"] = option.m_Details.m_ID;
             optionNode["value"] = option.m_Value;
             return optionNode;
         };
@@ -211,7 +203,7 @@ namespace coffeepot
             {
                 const YAML::Node& optionNode = *it;
                 const int optionId = optionNode["id"].as<int>();
-                auto option = std::find_if(options.begin(), options.end(), [optionId](const auto& elem) { return elem.m_ID == optionId; });
+                auto option = std::find_if(options.begin(), options.end(), [optionId](const auto& elem) { return elem.m_Details.m_ID == optionId; });
 
                 assert(option != options.end());
                 option->m_Value = optionNode["value"].as<std::string>();
