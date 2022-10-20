@@ -15,14 +15,15 @@ actions:
       - id: 0
         name: Branch
         default: master
+        inputType: Text
   - id: 5
     name: Test
     command: ls
     options:
       - id: 0
         name: option
-        default: One
-        choices:
+        inputType: ComboBox
+        valueList:
           - "One"
           - "Two"
           - "Three"
@@ -33,4 +34,13 @@ actions:
       - id: 0
         name: option
         inputType: Checkbox
+        valueList:
+          - "One"
+  - id: 7
+    name: Git Fetch
+    command: git fetch origin {}
+    options:
+      - id: 0
+        name: Branch
         default: master
+        inputType: OptionalText
