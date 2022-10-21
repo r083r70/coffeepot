@@ -17,6 +17,9 @@ void coffeepot::MainMenuBarScreen::tick()
         if (ImGui::MenuItem("Refresh"))
             App::get()->refreshActionsAndPlaylists();
 
+        if (ImGui::MenuItem("SaveAll"))
+            App::get()->saveAll();
+
         if (ImGui::MenuItem("Exit"))
             EventDispatcher::get()->createEvent(EventType::Terminate);
 

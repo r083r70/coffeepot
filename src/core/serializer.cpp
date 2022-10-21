@@ -267,6 +267,8 @@ namespace coffeepot
 
 		const YAML::Node rootNode = YAML::LoadFile(GlobalOptionsFile);
 		const auto& optionsNode = rootNode["options"];
+		if (!optionsNode)
+			return false;
 
 		globalOptions.clear();
 		globalOptions.reserve(optionsNode.size());

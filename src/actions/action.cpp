@@ -14,6 +14,8 @@ namespace coffeepot
         {
 		case InputType::Text:
 			return "Text";
+		case InputType::OptionalText:
+			return "OptionalText";
 		case InputType::Checkbox:
 			return "Checkbox";
 		case InputType::ComboBox:
