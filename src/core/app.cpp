@@ -7,6 +7,7 @@
 #include "platform.h"
 #include "screens/actionscreen.h"
 #include "screens/executionscreen.h"
+#include "screens/globaloptionscreen.h"
 #include "screens/logscreen.h"
 #include "screens/playlistscreen.h"
 #include "serializer.h"
@@ -50,6 +51,7 @@ namespace coffeepot
 		m_Screens.push_back(new ExecutionScreen());
 		m_Screens.push_back(new LogScreen());
 		m_Screens.push_back(new PlaylistScreen());
+		m_Screens.push_back(new GlobalOptionScreen());
 
         Serializer::loadActionsAndPlaylists(m_Actions, m_Playlists);
         ActionsManager::get()->init();
