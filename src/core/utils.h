@@ -19,7 +19,7 @@ namespace ImGui
 
     bool PlaylistTree(coffeepot::Playlist& playlist, bool bCanRun = false);
     bool ActionTree(coffeepot::Action& action, bool bCanRun = false);
-    void OptionTree(coffeepot::Option& option);
+    void OptionRow(coffeepot::Option& option);
 
     enum class BuilderFooterResult
     {

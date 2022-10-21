@@ -102,7 +102,7 @@ namespace ImGui
         if (bTreeNode)
         {
             auto& options = action.m_Options;
-			std::for_each(options.begin(), options.end(), [](auto& elem) { OptionTree(elem); });
+			std::for_each(options.begin(), options.end(), [](auto& elem) { OptionRow(elem); });
 
             ImGui::TreePop();
         }
@@ -111,7 +111,7 @@ namespace ImGui
         return bResult;
     }
 
-    void OptionTree(coffeepot::Option& option)
+    void OptionRow(coffeepot::Option& option)
     {
 		ImGui::PushID(&option);
 		ImGui::TableNextRow();
