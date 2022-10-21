@@ -5,6 +5,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include<cassert>
+#include<filesystem>
 #include<fstream>
 
 namespace YAML
@@ -101,6 +102,11 @@ namespace YAML
 
 namespace coffeepot
 {
+	static std::string ActionsFile = "actions.yaml";
+	static std::string PlaylistFile = "playlists.yaml";
+	static std::string GlobalOptionsFile = "globalOptions.yaml";
+	static std::string CoffeepotFile = "coffeepot.yaml";
+
     bool Serializer::loadActionsAndPlaylists(std::vector<Action>& actions, std::vector<Playlist>& playlist)
     {
         return loadActions(actions) && loadPlaylists(actions, playlist);
@@ -112,14 +118,17 @@ namespace coffeepot
         for (const auto& action : actions)
             rootNode["actions"].push_back(YAML::Node(action));
 
-        std::ofstream fout("actions.yaml");
+        std::ofstream fout(ActionsFile);
         fout << rootNode << std::endl;
         return true;
 	}
 
 	bool Serializer::loadActions(std::vector<Action>& actions)
 	{
-        const YAML::Node rootNode = YAML::LoadFile("actions.yaml");
+		if (!std::filesystem::exists(ActionsFile))
+			return false;
+
+        const YAML::Node rootNode = YAML::LoadFile(ActionsFile);
         const auto& actionsNode = rootNode["actions"];
 
         actions.clear();
@@ -172,14 +181,17 @@ namespace coffeepot
         for (const auto& playlist : playlists)
             rootNode["playlists"].push_back(createPlaylistNode(playlist));
 
-        std::ofstream fout("playlists.yaml");
+        std::ofstream fout(PlaylistFile);
         fout << rootNode << std::endl;
         return true;
     }
 
     bool Serializer::loadPlaylists(const std::vector<Action>& actions, std::vector<Playlist>& playlists)
-    {
-        const YAML::Node rootNode = YAML::LoadFile("playlists.yaml");
+	{
+		if (!std::filesystem::exists(PlaylistFile))
+			return false;
+
+        const YAML::Node rootNode = YAML::LoadFile(PlaylistFile);
         const auto& playlistsNode = rootNode["playlists"];
 
         playlists.clear();
@@ -232,20 +244,62 @@ namespace coffeepot
         return true;
     }
 
+	bool Serializer::saveGlobalOptions(const std::unordered_map<std::string, std::string>& globalOptions)
+	{
+		YAML::Node rootNode;
+		for (auto& [key, value] : globalOptions)
+		{
+			YAML::Node option;
+			option["key"] = key;
+			option["value"] = value;
+			rootNode["options"].push_back(option);
+		}
+
+		std::ofstream fout(GlobalOptionsFile);
+		fout << rootNode << std::endl;
+		return true;
+	}
+
+	bool Serializer::loadGlobalOptions(std::unordered_map<std::string, std::string>& globalOptions)
+	{
+		if (!std::filesystem::exists(GlobalOptionsFile))
+			return false;
+
+		const YAML::Node rootNode = YAML::LoadFile(GlobalOptionsFile);
+		const auto& optionsNode = rootNode["options"];
+
+		globalOptions.clear();
+		globalOptions.reserve(optionsNode.size());
+		CP_TRACE("Found {} global options", optionsNode.size());
+
+		for (auto it = optionsNode.begin(); it != optionsNode.end(); ++it)
+		{
+			const auto& option = *it;
+			const auto key = option["key"].as<std::string>();
+			const auto value = option["value"].as<std::string>();
+			globalOptions[key] = value;
+		}
+
+		return true;
+	}
+
 	bool Serializer::saveWindowSize(int32_t width, int32_t height)
 	{
 		YAML::Node rootNode;
 		rootNode["width"] = width;
 		rootNode["height"] = height;
 
-		std::ofstream fout("coffeepot.yaml");
+		std::ofstream fout(CoffeepotFile);
 		fout << rootNode << std::endl;
 		return true;
 	}
 
 	bool Serializer::loadWindowSize(int32_t& width, int32_t& height)
 	{
-		const YAML::Node rootNode = YAML::LoadFile("coffeepot.yaml");
+		if (!std::filesystem::exists(CoffeepotFile))
+			return false;
+
+		const YAML::Node rootNode = YAML::LoadFile(CoffeepotFile);
 		width = rootNode["width"].as<int32_t>();
 		height = rootNode["height"].as<int32_t>();
 		return true;

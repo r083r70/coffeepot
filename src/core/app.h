@@ -14,7 +14,8 @@
 
 namespace coffeepot
 {
-    class Event;
+	class Event;
+	using GlobalOptionsMap = std::unordered_map<std::string, std::string>;
 
     class App : public EventSubscriber
     {
@@ -36,9 +37,10 @@ namespace coffeepot
 		inline std::vector<Playlist>& getAllPlaylists() { return m_Playlists; }
         inline void addPlaylist(const Playlist& playlist) { m_Playlists.push_back(playlist); }
 
-		inline std::unordered_map<std::string, std::string>& getGlobalOptions() { return m_GlobalOptions; }
+		inline GlobalOptionsMap& getGlobalOptions() { return m_GlobalOptions; }
         
         void refreshActionsAndPlaylists();
+        void saveAll();
 
     private:
         static App* s_Instance;
@@ -51,7 +53,7 @@ namespace coffeepot
 
         std::vector<Action> m_Actions;
         std::vector<Playlist> m_Playlists;
-        std::unordered_map<std::string, std::string> m_GlobalOptions;
+        GlobalOptionsMap m_GlobalOptions;
 
         std::vector<Screen*> m_Screens;
 

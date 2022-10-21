@@ -53,6 +53,7 @@ namespace coffeepot
 		m_Screens.push_back(new PlaylistScreen());
 		m_Screens.push_back(new GlobalOptionScreen());
 
+		Serializer::loadGlobalOptions(m_GlobalOptions);
         Serializer::loadActionsAndPlaylists(m_Actions, m_Playlists);
         ActionsManager::get()->init();
 
@@ -120,4 +121,12 @@ namespace coffeepot
         m_Playlists.clear();
 		Serializer::loadActionsAndPlaylists(m_Actions, m_Playlists);
 	}
+
+	void App::saveAll()
+	{
+        Serializer::saveGlobalOptions(m_GlobalOptions);
+		Serializer::saveActions(m_Actions);
+        Serializer::savePlaylists(m_Playlists);
+	}
+
 }

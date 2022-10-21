@@ -3,6 +3,7 @@
 
 #include"actions/action.h"
 #include"actions/playlist.h"
+#include "fa_icons.h"
 
 #include <algorithm>
 
@@ -131,26 +132,34 @@ namespace ImGui
 
 		// Set ItemWidth to leave space for the Button
 		const float buttonSize = ImGui::GetFrameHeight();
-		ImGui::SetNextItemWidth(- buttonSize - tmpItemSpacing);
-
+        
 		// Draw OptionInput
         switch (option.m_Details.m_Type)
         {
-        case coffeepot::InputType::Text:
+		case coffeepot::InputType::Text:
+		{
+			ImGui::SetNextItemWidth(-buttonSize - tmpItemSpacing);
 			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
-			break;
+		} break;
 		case coffeepot::InputType::OptionalText:
-            if (ImGui::Checkbox("OptionEnabled", option.b_Enabled) && !option.b_Enabled)
-                option.m_Value = "";
-			ImGui::InputString("OptionValue", option.m_Value, option.b_Enabled ? ImGuiInputTextFlags_CharsNoBlank : ImGuiInputTextFlags_ReadOnly);
-            break;
+		{
+			if (ImGui::Checkbox("OptionEnabled", option.b_Enabled) && !option.b_Enabled)
+				option.m_Value = "";
+			ImGui::SameLine();
+			if (!option.b_Enabled) ImGui::BeginDisabled();
+			ImGui::SetNextItemWidth(-buttonSize - tmpItemSpacing);
+			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
+			if (!option.b_Enabled) ImGui::EndDisabled();
+		} break;
 		case coffeepot::InputType::Checkbox:
-            ImGui::Checkbox("OptionEnabled", option.b_Enabled);
-			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_ReadOnly);
-            break;
-        case coffeepot::InputType::ComboBox:
-            ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
-            break;
+		{
+			ImGui::Checkbox("OptionEnabled", option.b_Enabled);
+		} break;
+		case coffeepot::InputType::ComboBox:
+		{
+			ImGui::SetNextItemWidth(-buttonSize - tmpItemSpacing);
+			ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
+		} break;
         }
 
 		// Draw Button
@@ -158,7 +167,7 @@ namespace ImGui
         if (ImGui::Button("", ImVec2(buttonSize, buttonSize)))
 		{
 			option.b_Enabled = true;
-			option.m_Value = option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
+			option.m_Value = !option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
         }
 
 		// Restore ItemSpacing

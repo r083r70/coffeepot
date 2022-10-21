@@ -20,6 +20,9 @@ namespace coffeepot
         static bool savePlaylists(const std::vector<Playlist>& playlists);
 		static bool loadPlaylists(const std::vector<Action>& actions, std::vector<Playlist>& playlists);
 
+		static bool saveGlobalOptions(const std::unordered_map<std::string, std::string>& globalOptions);
+		static bool loadGlobalOptions(std::unordered_map<std::string, std::string>& globalOptions);
+
 		static bool saveWindowSize(int32_t width, int32_t height);
 		static bool loadWindowSize(int32_t& width, int32_t& height);
 	};
