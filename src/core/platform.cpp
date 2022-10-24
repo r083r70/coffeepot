@@ -40,7 +40,7 @@ namespace coffeepot
 		m_Instance = static_cast<HINSTANCE>(GetModuleHandle(nullptr));
 	}
 
-	void Platform::init()
+	void Platform::start()
 	{
 		const wchar_t g_WindowClassName[] = L"WindowClass";
 		const wchar_t g_Title[] = L"Coffeepot";
@@ -55,7 +55,7 @@ namespace coffeepot
 		EventDispatcher::get()->subscribe(this);
 	}
 
-	void Platform::deinit()
+	void Platform::stop()
 	{
 		DestroyWindow(m_WindowHandle);
 		Windows::g_Platform = nullptr;
@@ -149,10 +149,9 @@ namespace coffeepot
 {
 	Platform::Platform() { }
 
-	void Platform::init() { }
-	void Platform::deinit() { }
-	void Platform::tick() { }
+	void Platform::start() { }
+	void Platform::stop() { }
 
-	bool Platform::onEvent(const Event& event) { return false; }
+	void Platform::tick() { }
 }
 #endif

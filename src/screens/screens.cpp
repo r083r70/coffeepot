@@ -1,9 +1,7 @@
 
 #include "screens.h"
 
-#include "core/app.h"
-#include "core/eventdispatcher.h"
-#include "core/log.h"
+#include "core/actionmanager.h"
 
 #include "imgui.h"
 
@@ -15,13 +13,10 @@ void coffeepot::MainMenuBarScreen::tick()
     if (ImGui::BeginMenu("Coffeepot"))
 	{
         if (ImGui::MenuItem("Refresh"))
-            App::get()->refreshActionsAndPlaylists();
+            ActionsManager::get()->reloadAll();
 
         if (ImGui::MenuItem("SaveAll"))
-            App::get()->saveAll();
-
-        if (ImGui::MenuItem("Exit"))
-            EventDispatcher::get()->createEvent(EventType::Terminate);
+            ActionsManager::get()->saveAll();
 
 		ImGui::EndMenu();
     }

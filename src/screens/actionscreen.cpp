@@ -1,12 +1,12 @@
 
 #include "actionscreen.h"
 
-#include "actions/actionmanager.h"
-#include "core/app.h"
-#include "core/log.h"
-#include "core/utils.h"
+#include "core/actionmanager.h"
+#include "utils/utils.h"
 
 #include "imgui.h"
+
+#include <algorithm>
 
 namespace coffeepot
 {
@@ -29,7 +29,7 @@ namespace coffeepot
         switch (ImGui::BuilderFooter("Action", b_CreatingAction))
         {
             case ImGui::BuilderFooterResult::Save:
-                App::get()->addAction(m_ActionTemplate);
+                ActionsManager::get()->Actions.push_back(m_ActionTemplate);
                 break;
             case ImGui::BuilderFooterResult::Start:
                 m_ActionTemplate = Action{};
@@ -42,7 +42,7 @@ namespace coffeepot
         if (!ImGui::BeginTable("", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
             return;
     
-        auto& actions = App::get()->getAllActions();
+        auto& actions = ActionsManager::get()->Actions;
         std::for_each(actions.begin(), actions.end(), [this](auto& elem) { renderAction(elem); });
 
         ImGui::EndTable();
@@ -53,7 +53,6 @@ namespace coffeepot
         if (ImGui::ActionTree(action, /*bCanRun =*/ true))
         {
             const bool bResult = ActionsManager::get()->executeAction(action);
-            CP_DEBUG("{0} => {1}", action.m_Name, bResult);
         }
     }
 

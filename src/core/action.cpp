@@ -1,6 +1,6 @@
 
 #include "action.h"
-#include "core/app.h"
+#include "core/actionmanager.h"
 
 #include <algorithm>
 #include <cassert>
@@ -43,7 +43,7 @@ namespace coffeepot
     {
 #if CP_WINDOWS
 		std::string result{ "cmd /c " };
-#elif CP_LINUX
+#else // CP_LINUX
 		std::string result{ "" };
 #endif
 
@@ -89,7 +89,7 @@ namespace coffeepot
 				// 3c. Named options
                 else
                 {
-                    auto& globalOptions = App::get()->getGlobalOptions();
+                    auto& globalOptions = ActionsManager::get()->GlobalOptions;
 
                     assert(globalOptions.find(optionStr) != globalOptions.end());
                     result += globalOptions[optionStr];

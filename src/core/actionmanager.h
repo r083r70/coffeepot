@@ -1,8 +1,11 @@
+#pragma once
 
+#include "core/layer.h"
 #include "playlist.h"
 
 #include <array>
 #include <atomic>
+#include <map>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -29,14 +32,18 @@ namespace coffeepot
         std::atomic<bool> b_Running = false;
     };
 
-    class ActionsManager
+    class ActionsManager : public kettle::Layer
     {
     public:
         static ActionsManager* get();
+        ActionsManager();
 
-        bool init();
-        void deinit();
-        void tick() {}
+        virtual void start() override;
+        virtual void stop() override;
+        virtual void tick() override {}
+
+		void reloadAll();
+		void saveAll();
 
         const Playlist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
 
@@ -48,9 +55,6 @@ namespace coffeepot
 
         void readOutput(ImGuiTextBuffer& textOutput);
 
-    protected:
-        ActionsManager() = default;
-
     private:
         void threadedTick();
         
@@ -61,6 +65,11 @@ namespace coffeepot
         void stopCurrentAction();
 
         void killAction();
+	
+	public:
+		std::vector<Action> Actions;
+		std::vector<Playlist> Playlists;
+		std::map<std::string, std::string> GlobalOptions;
 
     private:
         static ActionsManager* s_Instance;

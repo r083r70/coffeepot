@@ -1,8 +1,8 @@
 
 #include "utils.h"
 
-#include"actions/action.h"
-#include"actions/playlist.h"
+#include "core/action.h"
+#include "core/playlist.h"
 #include "fa_icons.h"
 
 #include <algorithm>

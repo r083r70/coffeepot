@@ -1,12 +1,11 @@
 
 #include "serializer.h"
 
-#include "core/log.h"
 #include "yaml-cpp/yaml.h"
 
-#include<cassert>
-#include<filesystem>
-#include<fstream>
+#include <cassert>
+#include <filesystem>
+#include <fstream>
 
 namespace YAML
 {
@@ -133,7 +132,6 @@ namespace coffeepot
 
         actions.clear();
         actions.reserve(actionsNode.size());
-        CP_TRACE("Found {} actions", actionsNode.size());
 
         for (auto it = actionsNode.begin(); it != actionsNode.end(); ++it)
 		{
@@ -196,7 +194,6 @@ namespace coffeepot
 
         playlists.clear();
         playlists.reserve(playlistsNode.size());
-        CP_TRACE("Found {} playlists", playlistsNode.size());
 
         const auto createAction = [&actions](const YAML::Node& actionNode) -> Action
         {
@@ -244,7 +241,7 @@ namespace coffeepot
         return true;
     }
 
-	bool Serializer::saveGlobalOptions(const std::unordered_map<std::string, std::string>& globalOptions)
+	bool Serializer::saveGlobalOptions(const std::map<std::string, std::string>& globalOptions)
 	{
 		YAML::Node rootNode;
 		for (auto& [key, value] : globalOptions)
@@ -260,7 +257,7 @@ namespace coffeepot
 		return true;
 	}
 
-	bool Serializer::loadGlobalOptions(std::unordered_map<std::string, std::string>& globalOptions)
+	bool Serializer::loadGlobalOptions(std::map<std::string, std::string>& globalOptions)
 	{
 		if (!std::filesystem::exists(GlobalOptionsFile))
 			return false;
@@ -271,8 +268,7 @@ namespace coffeepot
 			return false;
 
 		globalOptions.clear();
-		globalOptions.reserve(optionsNode.size());
-		CP_TRACE("Found {} global options", optionsNode.size());
+		//globalOptions.resize(optionsNode.size());
 
 		for (auto it = optionsNode.begin(); it != optionsNode.end(); ++it)
 		{

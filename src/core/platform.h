@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eventdispatcher.h"
+#include "core/layer.h"
 
 #define WITH_NOTIFYICON CP_WINDOWS
 #if WITH_NOTIFYICON
@@ -11,16 +11,15 @@ namespace coffeepot
 {
 	class Event;
 
-	class Platform : public EventSubscriber
+	class Platform : public kettle::Layer
 	{
 	public:
 		Platform();
 
-		void init();
-		void deinit();
-		void tick();
+		virtual void start() override;
+		virtual void stop() override;
 
-		virtual bool onEvent(const Event& event) override;
+		virtual void tick() override;
 
 #if WITH_NOTIFYICON
 		bool HandleNotifyIconAction(LPARAM action);

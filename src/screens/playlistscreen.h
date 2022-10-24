@@ -1,6 +1,6 @@
 #pragma once
 
-#include "actions/playlist.h"
+#include "core/playlist.h"
 #include "screens.h"
 
 namespace coffeepot

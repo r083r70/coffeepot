@@ -1,12 +1,12 @@
 
 #include "playlistscreen.h"
 
-#include "actions/actionmanager.h"
-#include "core/app.h"
-#include "core/log.h"
-#include "core/utils.h"
+#include "core/actionmanager.h"
+#include "utils/utils.h"
 
 #include "imgui.h"
+
+#include <algorithm>
 
 namespace coffeepot
 {
@@ -29,7 +29,7 @@ namespace coffeepot
         switch (ImGui::BuilderFooter("Playlist", b_CreatingPlaylist))
         {
             case ImGui::BuilderFooterResult::Save:
-                App::get()->addPlaylist(m_PlaylistTemplate);
+                ActionsManager::get()->Playlists.push_back(m_PlaylistTemplate);
                 break;
             case ImGui::BuilderFooterResult::Start:
                 m_PlaylistTemplate = Playlist{};
@@ -42,7 +42,7 @@ namespace coffeepot
         if (!ImGui::BeginTable("", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
             return;
     
-        auto& playlists = App::get()->getAllPlaylists();
+        auto& playlists = ActionsManager::get()->Playlists;
         std::for_each(playlists.begin(), playlists.end(), [this](auto& elem) { renderPlaylist(elem); });
 
         ImGui::EndTable();
@@ -53,7 +53,6 @@ namespace coffeepot
         if (ImGui::PlaylistTree(playlist, /*bCanRun =*/ true))
         {
             const bool bResult = ActionsManager::get()->executePlaylist(playlist);
-            CP_DEBUG("{0} => {1}", playlist.m_Name, bResult);
         }
     }
 
@@ -79,7 +78,7 @@ namespace coffeepot
         if (!ImGui::BeginCombo("", "Add Action"))
             return;
 
-        for (const auto& action : App::get()->getAllActions())
+        for (const auto& action : ActionsManager::get()->Actions)
         {
             if (ImGui::Selectable(action.m_Name.c_str(), false))
             {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "actions/action.h"
+#include "core/action.h"
 #include "screens.h"
 
 namespace coffeepot

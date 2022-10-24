@@ -1,8 +1,7 @@
 
 #include "actionmanager.h"
 
-#include "core/log.h"
-#include "core/serializer.h"
+#include "utils/serializer.h"
 
 #include "imgui.h"
 
@@ -28,23 +27,41 @@ namespace coffeepot
 
 	ActionsManager* ActionsManager::get()
     {
-        if (!s_Instance)
-            s_Instance = new ActionsManager();
         return s_Instance;
     }
 
-    bool ActionsManager::init()
+	ActionsManager::ActionsManager()
+	{
+		s_Instance = this;
+
+		Serializer::loadGlobalOptions(GlobalOptions);
+		Serializer::loadActionsAndPlaylists(Actions, Playlists);
+	}
+
+    void ActionsManager::start()
     {
         b_Ending = false;
         m_Thread = std::thread(&ActionsManager::threadedTick, this);
-        return true;
     }
 
-    void ActionsManager::deinit()
+    void ActionsManager::stop()
     {
         b_Ending = true;
         m_Thread.join();
     }
+
+	void ActionsManager::reloadAll()
+	{
+		Serializer::loadGlobalOptions(GlobalOptions);
+		Serializer::loadActionsAndPlaylists(Actions, Playlists);
+	}
+
+	void ActionsManager::saveAll()
+	{
+		Serializer::saveGlobalOptions(GlobalOptions);
+		Serializer::saveActions(Actions);
+		Serializer::savePlaylists(Playlists);
+	}
 
     bool ActionsManager::executeAction(const Action& action)
 	{
@@ -120,6 +137,9 @@ namespace coffeepot
                 localBuffer[readBytes] = '\0'; // ReadFile doesnt set Termination char
 #elif CP_LINUX
 			if (fgets(localBuffer.data(), outputFreeSize, m_ExecutionState.m_Pipe))
+			{
+#else
+			if (false)
 			{
 #endif
 			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
@@ -250,7 +270,6 @@ namespace coffeepot
         const std::lock_guard<std::mutex> lock(g_ActionMutex);
 
 #if CP_WINDOWS
-		CP_DEBUG("Killing {}", m_ExecutionState.m_ProcessInformation.dwProcessId);
 		m_ExecutionState.b_Running = false;
 
 		TerminateProcess(m_ExecutionState.m_ProcessInformation.hProcess, 0);
@@ -260,7 +279,6 @@ namespace coffeepot
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hThread);
 		CloseHandle(m_ExecutionState.m_Job);
 #elif CP_LINUX
-		CP_DEBUG("Killing {}", m_ExecutionState.m_PID);
 		m_ExecutionState.b_Running = false;
 
         kill(-m_ExecutionState.m_PID, SIGKILL);

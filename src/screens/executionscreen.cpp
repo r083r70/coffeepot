@@ -1,7 +1,7 @@
 
 #include "executionscreen.h"
 
-#include "actions/actionmanager.h"
+#include "core/actionmanager.h"
 #include "fa_icons.h"
 
 #include "imgui.h"

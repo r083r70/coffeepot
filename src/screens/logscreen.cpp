@@ -1,8 +1,7 @@
 
 #include "logscreen.h"
 
-#include "actions/actionmanager.h"
-#include "core/log.h"
+#include "core/actionmanager.h"
 
 namespace coffeepot
 {   
