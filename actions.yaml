@@ -14,7 +14,6 @@ actions:
     options:
       - id: 0
         name: Branch
-        default: master
         inputType: Text
   - id: 5
     name: Test
@@ -24,9 +23,9 @@ actions:
         name: option
         inputType: ComboBox
         valueList:
-          - "One"
-          - "Two"
-          - "Three"
+          - One
+          - Two
+          - Three
   - id: 6
     name: Checkbox
     command: ls
@@ -35,12 +34,11 @@ actions:
         name: option
         inputType: Checkbox
         valueList:
-          - "One"
+          - One
   - id: 7
     name: Git Fetch
     command: git fetch origin {}
     options:
       - id: 0
         name: Branch
-        default: master
         inputType: OptionalText
