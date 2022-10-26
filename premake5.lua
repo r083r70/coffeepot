@@ -42,7 +42,7 @@ project "coffeepot"
 
 	filter "system:windows"
 		systemversion "latest"
-		defines { "CP_WINDOWS" }
+        defines { "CP_WINDOWS", "YAML_CPP_STATIC_DEFINE" }
 		includedirs { "res/" }
 		files {
 			"res/coffeepot.rc",
