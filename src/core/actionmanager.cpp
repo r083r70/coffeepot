@@ -31,6 +31,9 @@ namespace coffeepot
     }
 
 	ActionsManager::ActionsManager()
+        : m_ExecutionState()
+        , m_OutputBuffer()
+        , b_Ending(false)
 	{
 		s_Instance = this;
 

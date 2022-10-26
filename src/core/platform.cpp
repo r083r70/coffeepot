@@ -5,10 +5,8 @@
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #pragma comment(lib, "comctl32.lib")
 
+#include "core/app.h"
 #include "resources.h"
-
-#include "app.h"
-#include "eventdispatcher.h"
 
 #include <cassert>
 #include <commctrl.h>
@@ -38,6 +36,7 @@ namespace coffeepot
 	Platform::Platform()
 	{
 		m_Instance = static_cast<HINSTANCE>(GetModuleHandle(nullptr));
+		Windows::g_Platform = this;
 	}
 
 	void Platform::start()
@@ -45,14 +44,10 @@ namespace coffeepot
 		const wchar_t g_WindowClassName[] = L"WindowClass";
 		const wchar_t g_Title[] = L"Coffeepot";
 
-		Windows::g_Platform = this;
-
 		CreateWindowClass(g_WindowClassName);
 		m_WindowHandle = CreatePlatformWindow(g_WindowClassName, g_Title);
 
 		m_NotifyIconVisible = false;
-
-		EventDispatcher::get()->subscribe(this);
 	}
 
 	void Platform::stop()
@@ -74,15 +69,10 @@ namespace coffeepot
 		}
 	}
 
-	bool Platform::onEvent(const Event& event)
+	bool Platform::onWindowHidden()
 	{
-		if (event.getType() == EventType::WindowClosed)
-			return CreateNotifyIcon();
-		
-		if (event.getType() == EventType::NotifyIconInteracted)
-			return DeleteNotifyIcon();
-
-		return false;
+		CreateNotifyIcon();
+		return true;
 	}
 
 	bool Platform::HandleNotifyIconAction(LPARAM action)
@@ -90,7 +80,7 @@ namespace coffeepot
 		if (LOWORD(action) != NIN_SELECT)
 			return false;
 
-		EventDispatcher::get()->createEvent(EventType::NotifyIconInteracted);
+		kettle::App::get()->showWindow();
 		return true;
 	}
 

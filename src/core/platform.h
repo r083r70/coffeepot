@@ -22,6 +22,7 @@ namespace coffeepot
 		virtual void tick() override;
 
 #if WITH_NOTIFYICON
+		virtual bool onWindowHidden() override;
 		bool HandleNotifyIconAction(LPARAM action);
 
 	private:

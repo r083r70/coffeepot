@@ -2,6 +2,7 @@
 #include "screens.h"
 
 #include "core/actionmanager.h"
+#include "core/app.h"
 
 #include "imgui.h"
 
@@ -17,6 +18,9 @@ void coffeepot::MainMenuBarScreen::tick()
 
         if (ImGui::MenuItem("SaveAll"))
             ActionsManager::get()->saveAll();
+
+		if (ImGui::MenuItem("Exit"))
+			kettle::App::get()->terminate();
 
 		ImGui::EndMenu();
     }

@@ -9,7 +9,9 @@ namespace coffeepot
         : ScreenWithFooter("Log")
         , m_TextBuffer()
         , b_AutoScrollDown(false)
-    {}
+	{
+		m_TextBuffer.clear();
+	}
 
     void LogScreen::tickContent()
     {
