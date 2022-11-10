@@ -51,6 +51,8 @@ namespace YAML
 			node["electivity"] = value.m_Details.m_Electivity;
 			node["inputType"] = value.m_Details.m_InputType;
 
+			node["prefix"] = value.m_Details.m_Prefix;
+
 			for (auto& value : value.m_Details.m_ValueList)
 				node["valueList"].push_back(value);
 
@@ -64,6 +66,8 @@ namespace YAML
 
 			value.m_Details.m_Electivity = node["electivity"].as<coffeepot::Electivity>();
             value.m_Details.m_InputType = node["inputType"].as<coffeepot::InputType>();
+
+			value.m_Details.m_Prefix = node["prefix"].as<std::string>();
 
 			if (const auto& choicesNode = node["valueList"])
 			{
@@ -169,7 +173,7 @@ namespace coffeepot
         {
             YAML::Node optionNode;
             optionNode["id"] = option.m_Details.m_ID;
-            optionNode["value"] = option.m_Value;
+			optionNode["value"] = option.m_Value;
             return optionNode;
         };
 
@@ -179,7 +183,10 @@ namespace coffeepot
             actionNode["id"] = action.m_ID;
 
             for (auto& option : action.m_Options)
-                actionNode["options"].push_back(createOptionNode(option));
+			{
+				if (option.b_Active)
+					actionNode["options"].push_back(createOptionNode(option));
+			}
 
             return actionNode;
         };
@@ -235,6 +242,7 @@ namespace coffeepot
 
                 assert(option != options.end());
                 option->m_Value = optionNode["value"].as<std::string>();
+				option->b_Active = true;
             }
 
             return action;
