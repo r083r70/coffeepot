@@ -35,6 +35,11 @@ namespace coffeepot
 
 	Platform::Platform()
 	{
+#if CP_RELEASE
+		auto consoleWnd = GetConsoleWindow();
+		PostMessage(consoleWnd, WM_QUIT, 0, 0);
+#endif
+
 		m_Instance = static_cast<HINSTANCE>(GetModuleHandle(nullptr));
 		Windows::g_Platform = this;
 	}
@@ -53,6 +58,7 @@ namespace coffeepot
 	void Platform::stop()
 	{
 		DestroyWindow(m_WindowHandle);
+
 		Windows::g_Platform = nullptr;
 	}
 

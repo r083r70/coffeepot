@@ -35,9 +35,11 @@ project "coffeepot"
 	}
 
 	filter "Debug"
+        defines { "CP_DEBUG" }
 		symbols "On"
 
 	filter "Release"
+        defines { "CP_RELEASE" }
 		optimize "On"
 
 	filter "system:windows"
