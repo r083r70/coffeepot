@@ -14,13 +14,17 @@ actions:
     options:
       - id: 0
         name: Branch
+        electivity: Required
         inputType: Text
+        valueList:
+          - ""
   - id: 5
     name: Test
     command: ls
     options:
       - id: 0
         name: option
+        electivity: Required
         inputType: ComboBox
         valueList:
           - One
@@ -32,7 +36,8 @@ actions:
     options:
       - id: 0
         name: option
-        inputType: Checkbox
+        electivity: Optional
+        inputType: Fixed
         valueList:
           - One
   - id: 7
@@ -41,4 +46,7 @@ actions:
     options:
       - id: 0
         name: Branch
-        inputType: OptionalText
+        electivity: Optional
+        inputType: MultiText
+        valueList:
+          - ""

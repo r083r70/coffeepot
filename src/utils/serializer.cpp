@@ -9,6 +9,21 @@
 
 namespace YAML
 {
+	template<>
+	struct convert<coffeepot::Electivity>
+	{
+		static Node encode(const coffeepot::Electivity& value)
+		{
+			return Node(coffeepot::ElectivityToString(value));
+		}
+
+		static bool decode(const Node& node, coffeepot::Electivity& value)
+		{
+			value = coffeepot::StringToElectivity(node.as<std::string>().c_str());
+			return true;
+		}
+	};
+
     template<>
     struct convert<coffeepot::InputType>
     {
@@ -19,7 +34,7 @@ namespace YAML
 
         static bool decode(const Node& node, coffeepot::InputType& value)
 		{
-            value = coffeepot::StringToInputType(node.as<std::string>());
+            value = coffeepot::StringToInputType(node.as<std::string>().c_str());
             return true;
         }
 	};
@@ -32,7 +47,9 @@ namespace YAML
 			YAML::Node node;
 			node["id"] = value.m_Details.m_ID;
 			node["name"] = value.m_Details.m_Name;
-			node["inputType"] = value.m_Details.m_Type;
+
+			node["electivity"] = value.m_Details.m_Electivity;
+			node["inputType"] = value.m_Details.m_InputType;
 
 			for (auto& value : value.m_Details.m_ValueList)
 				node["valueList"].push_back(value);
@@ -44,7 +61,9 @@ namespace YAML
 		{
 			value.m_Details.m_ID = node["id"].as<int>();
 			value.m_Details.m_Name = node["name"].as<std::string>();
-            value.m_Details.m_Type = node["inputType"].as<coffeepot::InputType>();
+
+			value.m_Details.m_Electivity = node["electivity"].as<coffeepot::Electivity>();
+            value.m_Details.m_InputType = node["inputType"].as<coffeepot::InputType>();
 
 			if (const auto& choicesNode = node["valueList"])
 			{
@@ -53,9 +72,9 @@ namespace YAML
 					value.m_Details.m_ValueList.push_back(it->Scalar());
 			}
 
-            // Init CheckboxValue
-            if (value.m_Details.m_Type == coffeepot::InputType::Checkbox && !value.m_Details.m_ValueList.empty())
-                value.m_Value = value.m_Details.m_ValueList[0];
+			// Init Option's value with Default value
+			assert(!value.m_Details.m_ValueList.empty());
+			value.m_Value = value.m_Details.m_ValueList[0];
 
 			return true;
         }

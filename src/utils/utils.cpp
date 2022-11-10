@@ -125,53 +125,36 @@ namespace ImGui
 		// > Column 1
 		ImGui::TableSetColumnIndex(1);
 
-		// Remove ItemSpacing
-		const float itemSpacing = ImGui::GetStyle().ItemSpacing.x;
-        const float tmpItemSpacing = itemSpacing * 0.5f;
-		ImGui::GetStyle().ItemSpacing.x = tmpItemSpacing;
+		// Checkbox
+		const bool bIsRequired = option.m_Details.m_Electivity == coffeepot::Electivity::Required;
+        if (!bIsRequired)
+		{
+            if (ImGui::Checkbox("OptionActive", option.b_Active))
+                option.m_Value = option.b_Active && !option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
 
-		// Set ItemWidth to leave space for the Button
-		const float buttonSize = ImGui::GetFrameHeight();
-        
-		// Draw OptionInput
-        switch (option.m_Details.m_Type)
+			ImGui::SameLine();
+		}
+
+        ImGui::BeginDisabled(!bIsRequired && !option.b_Active);
+
+		// Input
+        switch (option.m_Details.m_InputType)
         {
 		case coffeepot::InputType::Text:
-		{
-			ImGui::SetNextItemWidth(-buttonSize - tmpItemSpacing);
+			ImGui::SetNextItemWidth(-FLT_MIN);
 			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
-		} break;
-		case coffeepot::InputType::OptionalText:
-		{
-			if (ImGui::Checkbox("OptionEnabled", option.b_Enabled) && !option.b_Enabled)
-				option.m_Value = "";
-			ImGui::SameLine();
-			if (!option.b_Enabled) ImGui::BeginDisabled();
-			ImGui::SetNextItemWidth(-buttonSize - tmpItemSpacing);
-			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
-			if (!option.b_Enabled) ImGui::EndDisabled();
-		} break;
-		case coffeepot::InputType::Checkbox:
-		{
-			ImGui::Checkbox("OptionEnabled", option.b_Enabled);
-		} break;
+            break;
+		case coffeepot::InputType::MultiInput:
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::InputString("OptionValue", option.m_Value);
+            break;
 		case coffeepot::InputType::ComboBox:
-		{
-			ImGui::SetNextItemWidth(-buttonSize - tmpItemSpacing);
+			ImGui::SetNextItemWidth(-FLT_MIN);
 			ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
-		} break;
+			break;
         }
 
-		// Draw Button
-		ImGui::SameLine();
-        if (ImGui::Button("", ImVec2(buttonSize, buttonSize)))
-		{
-			option.b_Enabled = true;
-			option.m_Value = !option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
-        }
-
-		// Restore ItemSpacing
-		ImGui::GetStyle().ItemSpacing.x = itemSpacing;
+		ImGui::EndDisabled();
 
 		ImGui::PopID();
     }

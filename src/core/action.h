@@ -5,16 +5,25 @@
 
 namespace coffeepot
 {
-    enum class InputType
+    enum class Electivity
     {
-        Text,
-        OptionalText,
-        Checkbox,
-        ComboBox
+        Required = 0,
+        Optional = 1
     };
 
-	std::string InputTypeToString(InputType value);
-	InputType StringToInputType(std::string value);
+    const char* ElectivityToString(Electivity value);
+    Electivity StringToElectivity(const char* value);
+
+    enum class InputType
+    {
+		Text = 0,
+		MultiInput = 1,
+		ComboBox = 2,
+        Fixed = 3
+    };
+
+    const char* InputTypeToString(InputType value);
+	InputType StringToInputType(const char* value);
     
     struct OptionDetails
     {
@@ -22,15 +31,18 @@ namespace coffeepot
 		int32_t m_ID = 0;
 		std::string m_Name;
 
-        InputType m_Type;
+        Electivity m_Electivity;
+        InputType m_InputType;
+
+		std::string m_Prefix;
 		std::vector<std::string> m_ValueList;
     };
 
     struct Option
     {
-    public:
+	public:
 		std::string m_Value;
-		bool b_Enabled = true;
+		bool b_Active = true;
 
         OptionDetails m_Details;
     };

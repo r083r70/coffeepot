@@ -8,36 +8,61 @@
 
 namespace coffeepot
 {
-	std::string InputTypeToString(InputType value)
+#pragma region Helpers
+    const char* ElectivityToString(Electivity value)
 	{
         switch (value)
         {
-		case InputType::Text:
-			return "Text";
-		case InputType::OptionalText:
-			return "OptionalText";
-		case InputType::Checkbox:
-			return "Checkbox";
-		case InputType::ComboBox:
-			return "ComboBox";
+        case Electivity::Required:
+            return "Required";
+        case Electivity::Optional:
+            return "Optional";
         default:
             return "";
         }
 	}
 
-	InputType StringToInputType(std::string value)
+	Electivity StringToElectivity(const char* value)
 	{
-        if (value == "Text")
-			return InputType::Text;
-		if (value == "OptionalText")
-			return InputType::OptionalText;
-		if (value == "Checkbox")
-			return InputType::Checkbox;
-        if (value == "ComboBox")
-            return InputType::ComboBox;
+		if (0 == strcmp(value, "Required"))
+			return Electivity::Required;
+		if (0 == strcmp(value, "Optional"))
+			return Electivity::Optional;
+
+		return Electivity::Optional;
+	}
+
+    const char* InputTypeToString(InputType value)
+	{
+        switch (value)
+        {
+		case InputType::Text:
+			return "Text";
+		case InputType::MultiInput:
+			return "DoubleText";
+		case InputType::ComboBox:
+			return "ComboBox";
+		case InputType::Fixed:
+			return "Fixed";
+        default:
+            return "";
+        }
+	}
+
+    InputType StringToInputType(const char* value)
+    {
+        if (0 == strcmp(value, "Text"))
+            return InputType::Text;
+        if (0 == strcmp(value, "DoubleText"))
+            return InputType::MultiInput;
+        if (0 == strcmp(value, "ComboBox"))
+			return InputType::ComboBox;
+		if (0 == strcmp(value, "Fixed"))
+			return InputType::Fixed;
 
         return InputType::Text;
-	}
+    }
+#pragma endregion
 
     std::string Action::createFullCommand() const
     {
@@ -105,24 +130,19 @@ namespace coffeepot
 
     const std::string& Action::getOptionValueByID(int32_t id) const
 	{
-		static std::string s_Empty;
-
         for (const auto& option : m_Options)
         {
             if (option.m_Details.m_ID != id)
                 continue;
 
-            switch (option.m_Details.m_Type)
-            {
-			case InputType::Text:
-			case InputType::ComboBox:
-				return option.m_Value;
-			case InputType::OptionalText:
-			case InputType::Checkbox:
-				return option.b_Enabled ? option.m_Value : s_Empty;
-            }
+            const bool bIsRequired = option.m_Details.m_Electivity == Electivity::Required;
+            if (bIsRequired && option.b_Active)
+                return option.m_Details.m_Prefix + " " + option.m_Value;
+
+            break;
         }
 
+        static std::string s_Empty{""};
         return s_Empty;
     }
 }
