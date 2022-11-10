@@ -287,8 +287,6 @@ namespace coffeepot
 			return false;
 
 		globalOptions.clear();
-		//globalOptions.resize(optionsNode.size());
-
 		for (auto it = optionsNode.begin(); it != optionsNode.end(); ++it)
 		{
 			const auto& option = *it;
