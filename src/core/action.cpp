@@ -53,7 +53,7 @@ namespace coffeepot
     {
         if (0 == strcmp(value, "Text"))
             return InputType::Text;
-        if (0 == strcmp(value, "DoubleText"))
+        if (0 == strcmp(value, "MultiText"))
             return InputType::MultiInput;
         if (0 == strcmp(value, "ComboBox"))
 			return InputType::ComboBox;
