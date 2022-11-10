@@ -4,6 +4,7 @@ obj/
 
 # VS files
 .vs/
+enc_temp_folder/
 *.sln
 *.vcxproj
 *.vcxproj.*
