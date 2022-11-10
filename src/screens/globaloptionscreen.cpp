@@ -15,6 +15,7 @@ void coffeepot::GlobalOptionScreen::tickContent()
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text(name.c_str());
 		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputString("Option", value, ImGuiInputTextFlags_CharsNoBlank);
 	}
 

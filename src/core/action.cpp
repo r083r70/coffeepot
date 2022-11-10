@@ -128,21 +128,20 @@ namespace coffeepot
         return result;
     }
 
-    const std::string& Action::getOptionValueByID(int32_t id) const
+    std::string Action::getOptionValueByID(int32_t id) const
 	{
         for (const auto& option : m_Options)
         {
             if (option.m_Details.m_ID != id)
                 continue;
 
-            const bool bIsRequired = option.m_Details.m_Electivity == Electivity::Required;
-            if (bIsRequired && option.b_Active)
-                return option.m_Details.m_Prefix + " " + option.m_Value;
+            const bool bIsOptional = option.m_Details.m_Electivity == Electivity::Optional;
+			if (bIsOptional && !option.b_Active)
+				break;
 
-            break;
+            return option.m_Details.m_Prefix + option.m_Value;
         }
 
-        static std::string s_Empty{""};
-        return s_Empty;
+        return "";
     }
 }

@@ -42,7 +42,7 @@ namespace coffeepot
     {
 	public:
 		std::string m_Value;
-		bool b_Active = true;
+		bool b_Active = false;
 
         OptionDetails m_Details;
     };
@@ -51,7 +51,7 @@ namespace coffeepot
     {
     public:
         std::string createFullCommand() const;
-        const std::string& getOptionValueByID(int32_t id) const;
+        std::string getOptionValueByID(int32_t id) const;
 
     public:
         int32_t m_ID;
