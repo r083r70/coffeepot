@@ -1,9 +1,9 @@
 
+#include "core/actionmanager.h"
 #include "core/app.h"
 #include "core/layer.h"
-
-#include "core/actionmanager.h"
 #include "core/platform.h"
+#include "fa_icons.h"
 
 #include "screens/actionscreen.h"
 #include "screens/executionscreen.h"
@@ -44,7 +44,21 @@ int main()
 	int32_t width, height;
 	coffeepot::Serializer::loadWindowSize(width, height);
 
-    kettle::App app{"Title", width, height};
+	// Setup Fonts
+	{
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+		ImFontConfig icons_config;
+		icons_config.MergeMode = true;
+		icons_config.GlyphMinAdvanceX = 16.0f;
+		icons_config.PixelSnapH = true;
+		io.Fonts->AddFontDefault();
+		io.Fonts->AddFontFromFileTTF("res/fa-solid-900.otf", 11.0f, &icons_config, icons_ranges);
+		io.Fonts->Build();
+	}
+
+	kettle::App app{ "Title", width, height };
 	app.pushLayer<coffeepot::Platform>();
 	app.pushLayer<coffeepot::ActionsManager>();
     app.pushLayer<UILayer>();

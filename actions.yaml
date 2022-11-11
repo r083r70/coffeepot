@@ -16,6 +16,7 @@ actions:
         name: Branch
         electivity: Required
         inputType: Text
+        prefix: ""
         valueList:
           - ""
   - id: 5
@@ -26,6 +27,7 @@ actions:
         name: option
         electivity: Required
         inputType: ComboBox
+        prefix: ""
         valueList:
           - One
           - Two
@@ -38,6 +40,7 @@ actions:
         name: option
         electivity: Optional
         inputType: Fixed
+        prefix: ""
         valueList:
           - One
   - id: 7
@@ -48,5 +51,6 @@ actions:
         name: Branch
         electivity: Optional
         inputType: MultiText
+        prefix: ""
         valueList:
           - ""

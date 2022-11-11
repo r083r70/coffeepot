@@ -45,8 +45,8 @@ namespace coffeepot
 		switch (actionState)
 		{
 		case ActionState::Done:			ImGui::Text(ICON_FA_CIRCLE_CHECK); break;
-		case ActionState::Running:		ImGui::Text(ICON_FA_CIRCLE_NOTCH); break;
-		case ActionState::Waiting:		ImGui::Text(ICON_FA_SPINNER); break;
+		case ActionState::Running:		ImGui::Text(ICON_FA_BOLT); break;
+		case ActionState::Waiting:		ImGui::Text(ICON_FA_HOURGLASS_EMPTY); break;
 		}
 
 		ImGui::SameLine();
