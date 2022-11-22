@@ -13,29 +13,17 @@ namespace coffeepot
 {
     PlaylistScreen::PlaylistScreen()
         : ScreenWithFooter("Playlists")
-        , b_CreatingPlaylist(false)
-        , m_PlaylistTemplate()
     {}
 
     void PlaylistScreen::tickContent()
     {
-        if (b_CreatingPlaylist)
-            renderPlaylistBuilder();
-        else
-            renderPlaylists();
+		renderPlaylists();
     }
 
     void PlaylistScreen::tickFooter()
-    {
-        switch (ImGui::BuilderFooter("Playlist", b_CreatingPlaylist))
-        {
-            case ImGui::BuilderFooterResult::Save:
-                ActionsManager::get()->Playlists.push_back(m_PlaylistTemplate);
-                break;
-            case ImGui::BuilderFooterResult::Start:
-                m_PlaylistTemplate = Playlist{};
-                break;
-        }
+	{
+		if (ImGui::Button("Create new Playlist"))
+			ActionsManager::get()->Playlists.emplace_back();
     }
     
     void PlaylistScreen::renderPlaylists()
@@ -62,17 +50,17 @@ namespace coffeepot
 		ImGui::PushID(&playlist);
 		const std::string& playlistName = playlist.m_Name;
 
-		ImGui::TableNextRow();
-        bool bTreeNode = false;
+        bool bPlaylistTreeNode = false;
 
-        // First Row
+		ImGui::TableNextRow();
+
+        // Playlist Name
 		{
 			ImGui::TableSetColumnIndex(0);
 			ImGui::AlignTextToFramePadding();
-			bTreeNode = ImGui::TreeNode("Playlist", playlistName.c_str());
+			bPlaylistTreeNode = ImGui::TreeNode("Playlist", playlistName.c_str());
 
 			ImGui::TableSetColumnIndex(1);
-
             if (m_RenamingPlaylist == &playlist)
             {
 				if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
@@ -87,100 +75,186 @@ namespace coffeepot
             }
             else
 			{
+				// Run
 				if (ImGui::IconButton(ICON_FA_PLAY))
 					ActionsManager::get()->executePlaylist(playlist);
 
-				ImGui::SameLine();
+				// Add Action
+				ImGui::SameLine(0.f, 3);
+				if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
+				{
+					m_ExpandingPlaylist = &playlist;
+					m_ExpansionIndex = -1;
+				}
+
+				// Rename
+				ImGui::SameLine(0.f, 3);
 				if (ImGui::IconButton(ICON_FA_PEN))
 				{
 					m_RenamingPlaylist = &playlist;
                     m_NewPlaylistName = playlistName;
 				}
 
-				ImGui::SameLine();
+				// Delete
+				ImGui::SameLine(0.f, 3);
                 if (ImGui::IconButton(ICON_FA_TRASH))
                     m_DeletingPlaylist = &playlist;
 			}
 		}
 
-		// Show Actions
-		if (bTreeNode)
+		// Actions
+		if (bPlaylistTreeNode)
 		{
 			auto& actions = playlist.getActions();
-			std::for_each(actions.begin(), actions.end(), [this](auto& elem) { renderAction(elem); });
 
-			ImGui::TreePop();
+			int32_t swapIndex1 = -1, swapIndex2 = -1, removeIndex = -1;
+			const auto DrawIconButtonEx = [](const char* label, bool bEnabled) -> bool
+			{
+				ImGui::BeginDisabled(!bEnabled);
+				const bool bResult = ImGui::IconButton(label);
+				ImGui::EndDisabled();
+				return bResult;
+			};
+
+			for (int32_t i = 0; i < actions.size(); i++)
+			{
+				Action& action = actions[i];
+				const bool bIsFirst = i == 0;
+				const bool bIsLast = i == actions.size() - 1;
+
+				ImGui::PushID(&action);
+				const std::string& actionName = action.m_Name;
+
+				ImGui::TableNextRow();
+				bool bActionTreeNode = false;
+
+				// Action Name
+				{
+					// First Column
+					ImGui::TableSetColumnIndex(0);
+					ImGui::AlignTextToFramePadding();
+
+					if (action.m_Options.size() != 0)
+						bActionTreeNode = ImGui::TreeNode("Action", actionName.c_str());
+					else
+						ImGui::BulletText(actionName.c_str());
+
+					// Second Column
+					ImGui::TableSetColumnIndex(1);
+
+					// Add
+					if (ImGui::IconButton(ICON_FA_SQUARE_PLUS))
+					{
+						m_ExpandingPlaylist = &playlist;
+						m_ExpansionIndex = i + 1;
+					}
+
+					// Move Up
+					ImGui::SameLine(0.f, 3);
+					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
+					{
+						swapIndex1 = i;
+						swapIndex2 = i - 1;
+					}
+
+					// Move Down
+					ImGui::SameLine(0.f, 3);
+					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
+					{
+						swapIndex1 = i;
+						swapIndex2 = i + 1;
+					}
+
+					// Remove
+					ImGui::SameLine(0.f, 3);
+					if (ImGui::IconButton(ICON_FA_XMARK))
+						removeIndex = i;
+
+					// Execute
+					ImGui::SameLine(0.f, 3);
+					if (ImGui::IconButton(ICON_FA_PLAY))
+					{
+						ActionsManager::get()->executeAction(action);
+					}
+				}
+
+				// Show Options
+				if (bActionTreeNode)
+				{
+					auto& options = action.m_Options;
+					std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
+
+					ImGui::TreePop(); // ActionTree
+				}
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop(); // PlaylistTree
+
+			// Swap if needed
+			if (swapIndex1 != -1 && swapIndex2 != -1)
+			{
+				const auto tmp = actions[swapIndex1];
+				actions[swapIndex1] = actions[swapIndex2];
+				actions[swapIndex2] = tmp;
+			}
+
+			// Remove if needed
+			if (removeIndex != -1)
+				actions.erase(actions.begin() + removeIndex);
 		}
 
-		ImGui::PopID();
-    }
-
-	void PlaylistScreen::renderAction(Action& action)
-	{
-		ImGui::PushID(&action);
-		const std::string& actionName = action.m_Name;
-
-		ImGui::TableNextRow();
-		bool bTreeNode = false;
-
-		// First Row
-        {
+		// Add Action
+		if (m_ExpandingPlaylist == &playlist)
+		{
+			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			ImGui::AlignTextToFramePadding();
-
-			if (action.m_Options.size() != 0)
-				bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
-			else
-				ImGui::BulletText(actionName.c_str());
+			ImGui::Text("Choose Action:");
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 13);
-			if (ImGui::IconButton(ICON_FA_PLAY))
-				ActionsManager::get()->executeAction(action);
-		}
 
-        // Show Options
-		if (bTreeNode)
-		{
-			auto& options = action.m_Options;
-			std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
+			if (ImGui::IconButton(ICON_FA_DELETE_LEFT))
+			{
+				m_ExpandingPlaylist = nullptr;
+				m_ExpansionIndex = -1;
+			}
 
-			ImGui::TreePop();
+			Action action;
+			ImGui::SameLine();
+			if (renderActionSelector(action))
+			{
+				auto& actions = playlist.getActions();
+				if (m_ExpansionIndex != -1)
+					actions.insert(actions.begin() + m_ExpansionIndex, action);
+				else
+					actions.push_back(action);
+
+				m_ExpandingPlaylist = nullptr;
+				m_ExpansionIndex = -1;
+			}
 		}
 
 		ImGui::PopID();
-	}
-
-	void PlaylistScreen::renderPlaylistBuilder()
-    {
-        ImGui::PushID(&m_PlaylistTemplate);
-        
-        ImGui::Text("Name: ");
-        ImGui::SameLine();
-        ImGui::InputString("ActionName", m_PlaylistTemplate.m_Name);
-
-        const auto& actions = m_PlaylistTemplate.getActions();
-        std::for_each(actions.begin(), actions.end(), [](const auto& Elem) { ImGui::BulletText(Elem.m_Name.c_str()); });
-
-        ImGui::Separator();
-        renderActionSelector();
-
-        ImGui::PopID();
     }
 
-    void PlaylistScreen::renderActionSelector()
-    {
-        if (!ImGui::BeginCombo("", "Add Action"))
-            return;
+    bool PlaylistScreen::renderActionSelector(Action& outAction)
+	{
+		if (!ImGui::BeginCombo("", "Select.."))
+			return false;
 
+		bool bSelected = false;
         for (const auto& action : ActionsManager::get()->Actions)
         {
             if (ImGui::Selectable(action.m_Name.c_str(), false))
             {
-                m_PlaylistTemplate.addAction(action);
+				outAction = action;
+				bSelected = true;
             }
         }
 
         ImGui::EndCombo();
+		return bSelected;
     }
 }

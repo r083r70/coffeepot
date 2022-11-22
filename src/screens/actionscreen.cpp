@@ -95,7 +95,7 @@ namespace coffeepot
 				if (ImGui::IconButton(ICON_FA_PLAY))
 					ActionsManager::get()->executeAction(action);
 
-				ImGui::SameLine();
+				ImGui::SameLine(0.f, 3);
 				if (ImGui::IconButton(ICON_FA_PEN))
 				{
 					m_RenamingAction = &action;

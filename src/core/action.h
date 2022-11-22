@@ -49,15 +49,15 @@ namespace coffeepot
 
     struct Action
     {
-    public:
-        std::string createFullCommand() const;
-        std::string getOptionValueByID(int32_t id) const;
-
-    public:
+	public:
         int32_t m_ID;
         std::string m_Name;
 
         std::string m_Command;
-        std::vector<Option> m_Options;
+		std::vector<Option> m_Options;
+
+	public:
+		std::string createFullCommand() const;
+		std::string getOptionValueByID(int32_t id) const;
     };
 }

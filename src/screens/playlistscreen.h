@@ -16,20 +16,20 @@ namespace coffeepot
 
     private:
         void renderPlaylists();
-        void renderPlaylist(Playlist& playlist);
-        void renderAction(Action& action);
-        void renderOption(Option& option);
+		void renderPlaylist(Playlist& playlist);
 
-        void renderPlaylistBuilder();
-        void renderActionSelector();
+        bool renderActionSelector(Action& outAction);
     
     private:
-        bool b_CreatingPlaylist = false;
-        Playlist m_PlaylistTemplate;
-
+        // Rename
         Playlist* m_RenamingPlaylist = nullptr;
         std::string m_NewPlaylistName;
 
+		// Delete
         Playlist* m_DeletingPlaylist = nullptr;
+
+		// Expanding
+		Playlist* m_ExpandingPlaylist = nullptr;
+		int32_t m_ExpansionIndex = -1;
     };
 }

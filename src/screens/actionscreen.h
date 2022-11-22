@@ -28,6 +28,7 @@ namespace coffeepot
         bool b_CreatingAction = false;
         Action m_ActionTemplate;
 
+        // Rename
 		Action* m_RenamingAction = nullptr;
 		std::string m_NewActionName;
     };
