@@ -81,7 +81,7 @@ namespace coffeepot
     {
 		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
 
-        if (!m_ExecutionPlaylist.hasNextAction())
+        if (!isExecutingAction())
             m_ExecutionPlaylist.removeAllAction(); // It resets the nextActionIndex
 
         for (auto& action : playlist.getActions())
