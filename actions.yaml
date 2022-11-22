@@ -9,7 +9,7 @@ actions:
     name: List Files
     command: ls -lX
   - id: 4
-    name: Git Fetch
+    name: Git Fetch 2
     command: git fetch origin {}
     options:
       - id: 0
@@ -44,13 +44,13 @@ actions:
         valueList:
           - One
   - id: 7
-    name: Git Fetch
+    name: Git-Fetch
     command: git fetch origin {}
     options:
       - id: 0
         name: Branch
         electivity: Optional
-        inputType: MultiText
+        inputType: Text
         prefix: ""
         valueList:
           - ""

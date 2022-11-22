@@ -26,5 +26,10 @@ namespace coffeepot
     private:
         bool b_CreatingPlaylist = false;
         Playlist m_PlaylistTemplate;
+
+        Playlist* m_RenamingPlaylist = nullptr;
+        std::string m_NewPlaylistName;
+
+        Playlist* m_DeletingPlaylist = nullptr;
     };
 }

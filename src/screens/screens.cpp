@@ -13,10 +13,10 @@ void coffeepot::MainMenuBarScreen::tick()
 
     if (ImGui::BeginMenu("Coffeepot"))
 	{
-        if (ImGui::MenuItem("Refresh"))
+        if (ImGui::MenuItem("Reload All"))
             ActionsManager::get()->reloadAll();
 
-        if (ImGui::MenuItem("SaveAll"))
+        if (ImGui::MenuItem("Save All"))
             ActionsManager::get()->saveAll();
 
 		if (ImGui::MenuItem("Exit"))

@@ -2,6 +2,7 @@
 #include "actionscreen.h"
 
 #include "core/actionmanager.h"
+#include "fa_icons.h"
 #include "utils/utils.h"
 
 #include "imgui.h"
@@ -32,7 +33,10 @@ namespace coffeepot
                 
                 // Finalize ActionTemplate: set Default value
                 for (auto& option : m_ActionTemplate.m_Options)
+				{
 					option.m_Value = option.m_Details.m_ValueList[0];
+					option.b_Active = option.m_Details.m_Electivity == Electivity::Required;
+				}
 
                 ActionsManager::get()->Actions.push_back(m_ActionTemplate);
                 break;
@@ -54,11 +58,62 @@ namespace coffeepot
     }
     
     void ActionsScreen::renderAction(Action& action)
-    {
-        if (ImGui::ActionTree(action, /*bCanRun =*/ true))
-        {
-            const bool bResult = ActionsManager::get()->executeAction(action);
-        }
+	{
+		ImGui::PushID(&action);
+		const std::string& actionName = action.m_Name;
+
+		ImGui::TableNextRow();
+		bool bTreeNode = false;
+			
+		// First Row
+		{
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+
+			if (action.m_Options.size() != 0)
+				bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
+			else
+				ImGui::BulletText(actionName.c_str());
+
+			ImGui::TableSetColumnIndex(1);
+
+
+			if (m_RenamingAction == &action)
+			{
+				if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
+				{
+					action.m_Name = m_NewActionName;
+					m_RenamingAction = nullptr;
+				}
+
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputString("NewName", m_NewActionName);
+			}
+			else
+			{
+				if (ImGui::IconButton(ICON_FA_PLAY))
+					ActionsManager::get()->executeAction(action);
+
+				ImGui::SameLine();
+				if (ImGui::IconButton(ICON_FA_PEN))
+				{
+					m_RenamingAction = &action;
+					m_NewActionName = actionName;
+				}
+			}
+		}
+
+		// Show Options
+		if (bTreeNode)
+		{
+			auto& options = action.m_Options;
+			std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
+
+			ImGui::TreePop();
+		}
+
+		ImGui::PopID();
     }
 
     void ActionsScreen::renderActionBuilder()

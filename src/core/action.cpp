@@ -135,8 +135,7 @@ namespace coffeepot
             if (option.m_Details.m_ID != id)
                 continue;
 
-            const bool bIsOptional = option.m_Details.m_Electivity == Electivity::Optional;
-			if (bIsOptional && !option.b_Active)
+			if (!option.b_Active)
 				break;
 
             return option.m_Details.m_Prefix + option.m_Value;

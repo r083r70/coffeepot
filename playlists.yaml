@@ -7,12 +7,9 @@ playlists:
       - id: 4
         options:
           - id: 0
-            value: patch
+            value: rhgth
       - id: 5
         options:
           - id: 0
-            value: Three
+            value: Two
       - id: 6
-        options:
-          - id: 0
-            value: ""

@@ -2,7 +2,6 @@
 #include "utils.h"
 
 #include "core/action.h"
-#include "core/playlist.h"
 #include "fa_icons.h"
 
 #include <algorithm>
@@ -54,107 +53,64 @@ namespace ImGui
         return bPressed;
     }
 
-    bool PlaylistTree(coffeepot::Playlist& playlist, bool bCanRun /*= false*/)
-    {
-        ImGui::PushID(&playlist);
-        const std::string& playlistName = playlist.m_Name;
+	bool IconButton(const char* label)
+	{
+		auto OldFramePaddingX = ImGui::GetStyle().FramePadding.x;
+		ImGui::GetStyle().FramePadding.x = 2;
+		const bool bResult = ImGui::Button(label);
 
-        ImGui::TableNextRow();
+		ImGui::GetStyle().FramePadding.x = OldFramePaddingX;
+		return bResult;
+	}
 
-        ImGui::TableSetColumnIndex(0);
-        ImGui::AlignTextToFramePadding();
-        const bool bTreeNode = ImGui::TreeNode("Playlist", playlistName.c_str());
-        
-        ImGui::TableSetColumnIndex(1);
-        const bool bResult = bCanRun && ImGui::Button("Run");
-        
-
-        if (bTreeNode)
-        {
-            auto& actions = playlist.getActions();         
-            std::for_each(actions.begin(), actions.end(), [](auto& elem) { ActionTree(elem); });
-
-            ImGui::TreePop();
-        }
-
-        ImGui::PopID();
-        return bResult;
-    }
-
-    bool ActionTree(coffeepot::Action& action, bool bCanRun /*= false*/)
-    {
-        ImGui::PushID(&action);
-        const std::string& actionName = action.m_Name;
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::AlignTextToFramePadding();
-
-        bool bTreeNode = false;
-        if (action.m_Options.size() != 0)
-            bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
-        else
-            ImGui::BulletText(actionName.c_str());
-
-        ImGui::TableSetColumnIndex(1);
-        const bool bResult = bCanRun && ImGui::Button("Run");
-
-        if (bTreeNode)
-        {
-            auto& options = action.m_Options;
-			std::for_each(options.begin(), options.end(), [](auto& elem) { OptionRow(elem); });
-
-            ImGui::TreePop();
-        }
-
-        ImGui::PopID();
-        return bResult;
-    }
-
-    void OptionRow(coffeepot::Option& option)
+	void OptionRow(coffeepot::Option& option)
     {
 		ImGui::PushID(&option);
 		ImGui::TableNextRow();
 
 		// > Column 0
-		ImGui::TableSetColumnIndex(0);
-		ImGui::AlignTextToFramePadding();
-		ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		ImGui::TreeNodeEx("OptionName", treeNodeFlags, option.m_Details.m_Name.c_str());
-
-		// > Column 1
-		ImGui::TableSetColumnIndex(1);
-
-		// Checkbox
-		const bool bIsRequired = option.m_Details.m_Electivity == coffeepot::Electivity::Required;
-        if (!bIsRequired)
 		{
-            if (ImGui::Checkbox("OptionActive", option.b_Active))
-                option.m_Value = option.b_Active && !option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
-
-			ImGui::SameLine();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+			ImGui::TreeNodeEx("OptionName", treeNodeFlags, option.m_Details.m_Name.c_str());
 		}
 
-        ImGui::BeginDisabled(!bIsRequired && !option.b_Active);
+		// > Column 1
+		{
+			ImGui::TableSetColumnIndex(1);
 
-		// Input
-        switch (option.m_Details.m_InputType)
-        {
-		case coffeepot::InputType::Text:
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
-            break;
-		case coffeepot::InputType::MultiInput:
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::InputString("OptionValue", option.m_Value);
-            break;
-		case coffeepot::InputType::ComboBox:
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
-			break;
-        }
+			// Checkbox
+			const bool bIsRequired = option.m_Details.m_Electivity == coffeepot::Electivity::Required;
+			if (!bIsRequired)
+			{
+				if (ImGui::Checkbox("OptionActive", option.b_Active))
+					option.m_Value = option.b_Active && !option.m_Details.m_ValueList.empty() ? option.m_Details.m_ValueList[0] : "";
 
-		ImGui::EndDisabled();
+				ImGui::SameLine();
+			}
+
+			ImGui::BeginDisabled(!bIsRequired && !option.b_Active);
+
+			// Input
+			switch (option.m_Details.m_InputType)
+			{
+			case coffeepot::InputType::Text:
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputString("OptionValue", option.m_Value, ImGuiInputTextFlags_CharsNoBlank);
+				break;
+			case coffeepot::InputType::MultiInput:
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::InputString("OptionValue", option.m_Value);
+				break;
+			case coffeepot::InputType::ComboBox:
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
+				break;
+			}
+
+			ImGui::EndDisabled();
+		}
 
 		ImGui::PopID();
     }

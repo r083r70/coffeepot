@@ -1,6 +1,7 @@
 #include "globaloptionscreen.h"
 
 #include "core/actionmanager.h"
+#include "fa_icons.h"
 #include "utils/utils.h"
 
 #include "imgui.h"
@@ -27,7 +28,7 @@ void coffeepot::GlobalOptionScreen::tickFooter()
 	ImGui::InputString("NewOption", m_NewOptionName, ImGuiInputTextFlags_CharsNoBlank);
 	ImGui::SameLine();
 
-	if (ImGui::Button("AddOption"))
+	if (ImGui::Button(ICON_FA_SQUARE_PLUS))
 	{
 		auto& globalOptions = ActionsManager::get()->GlobalOptions;
 		if (globalOptions.find(m_NewOptionName) == globalOptions.end())

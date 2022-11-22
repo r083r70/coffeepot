@@ -79,6 +79,7 @@ namespace YAML
 			// Init Option's value with Default value
 			assert(!value.m_Details.m_ValueList.empty());
 			value.m_Value = value.m_Details.m_ValueList[0];
+			value.b_Active = value.m_Details.m_Electivity == coffeepot::Electivity::Required;
 
 			return true;
         }
@@ -242,7 +243,7 @@ namespace coffeepot
 
                 assert(option != options.end());
                 option->m_Value = optionNode["value"].as<std::string>();
-				option->b_Active = true;
+				option->b_Active = true; // If saved it was active
             }
 
             return action;

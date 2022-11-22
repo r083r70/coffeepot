@@ -2,6 +2,7 @@
 #include "playlistscreen.h"
 
 #include "core/actionmanager.h"
+#include "fa_icons.h"
 #include "utils/utils.h"
 
 #include "imgui.h"
@@ -45,18 +46,112 @@ namespace coffeepot
         auto& playlists = ActionsManager::get()->Playlists;
         std::for_each(playlists.begin(), playlists.end(), [this](auto& elem) { renderPlaylist(elem); });
 
-        ImGui::EndTable();
+		ImGui::EndTable();
+
+        // Perform Delete at the end of tick
+		if (m_DeletingPlaylist != nullptr)
+		{
+            auto elemToErase = std::remove_if(playlists.begin(), playlists.end(), [this](auto& elem) { return &elem == m_DeletingPlaylist; });
+            playlists.erase(elemToErase);
+			m_DeletingPlaylist = nullptr;
+		}
     }
 
     void PlaylistScreen::renderPlaylist(Playlist& playlist)
-    {
-        if (ImGui::PlaylistTree(playlist, /*bCanRun =*/ true))
-        {
-            const bool bResult = ActionsManager::get()->executePlaylist(playlist);
-        }
+	{
+		ImGui::PushID(&playlist);
+		const std::string& playlistName = playlist.m_Name;
+
+		ImGui::TableNextRow();
+        bool bTreeNode = false;
+
+        // First Row
+		{
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+			bTreeNode = ImGui::TreeNode("Playlist", playlistName.c_str());
+
+			ImGui::TableSetColumnIndex(1);
+
+            if (m_RenamingPlaylist == &playlist)
+            {
+				if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
+				{
+                    playlist.m_Name = m_NewPlaylistName;
+                    m_RenamingPlaylist = nullptr;
+				}
+
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::InputString("NewName", m_NewPlaylistName);
+            }
+            else
+			{
+				if (ImGui::IconButton(ICON_FA_PLAY))
+					ActionsManager::get()->executePlaylist(playlist);
+
+				ImGui::SameLine();
+				if (ImGui::IconButton(ICON_FA_PEN))
+				{
+					m_RenamingPlaylist = &playlist;
+                    m_NewPlaylistName = playlistName;
+				}
+
+				ImGui::SameLine();
+                if (ImGui::IconButton(ICON_FA_TRASH))
+                    m_DeletingPlaylist = &playlist;
+			}
+		}
+
+		// Show Actions
+		if (bTreeNode)
+		{
+			auto& actions = playlist.getActions();
+			std::for_each(actions.begin(), actions.end(), [this](auto& elem) { renderAction(elem); });
+
+			ImGui::TreePop();
+		}
+
+		ImGui::PopID();
     }
 
-    void PlaylistScreen::renderPlaylistBuilder()
+	void PlaylistScreen::renderAction(Action& action)
+	{
+		ImGui::PushID(&action);
+		const std::string& actionName = action.m_Name;
+
+		ImGui::TableNextRow();
+		bool bTreeNode = false;
+
+		// First Row
+        {
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+
+			if (action.m_Options.size() != 0)
+				bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
+			else
+				ImGui::BulletText(actionName.c_str());
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 13);
+			if (ImGui::IconButton(ICON_FA_PLAY))
+				ActionsManager::get()->executeAction(action);
+		}
+
+        // Show Options
+		if (bTreeNode)
+		{
+			auto& options = action.m_Options;
+			std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
+
+			ImGui::TreePop();
+		}
+
+		ImGui::PopID();
+	}
+
+	void PlaylistScreen::renderPlaylistBuilder()
     {
         ImGui::PushID(&m_PlaylistTemplate);
         
