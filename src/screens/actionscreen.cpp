@@ -72,69 +72,135 @@ namespace coffeepot
         if (!ImGui::BeginTable("", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
             return;
     
-        auto& actions = ActionsManager::get()->Actions;
-        std::for_each(actions.begin(), actions.end(), [this](auto& elem) { renderAction(elem); });
+		auto& actions = ActionsManager::get()->Actions;
 
-        ImGui::EndTable();
-    }
-    
-    void ActionsScreen::renderAction(Action& action)
-	{
-		ImGui::PushID(&action);
-		const std::string& actionName = action.m_Name;
-
-		ImGui::TableNextRow();
-		bool bTreeNode = false;
-			
-		// First Row
+		int32_t swapIndex1 = -1, swapIndex2 = -1;
+		const auto DrawIconButtonEx = [](const char* label, bool bEnabled) -> bool
 		{
-			ImGui::TableSetColumnIndex(0);
-			ImGui::AlignTextToFramePadding();
-
-			if (action.m_Options.size() != 0)
-				bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
-			else
-				ImGui::BulletText(actionName.c_str());
-
-			ImGui::TableSetColumnIndex(1);
+			ImGui::BeginDisabled(!bEnabled);
+			const bool bResult = ImGui::IconButton(label);
+			ImGui::EndDisabled();
+			return bResult;
+		};
 
 
-			if (m_RenamingAction == &action)
+		for (int32_t i = 0; i < actions.size(); i++)
+		{
+			Action& action = actions[i];
+			const bool bIsFirst = i == 0;
+			const bool bIsLast = i == actions.size() - 1;
+
+			ImGui::PushID(&action);
+			const std::string& actionName = action.m_Name;
+
+			ImGui::TableNextRow();
+			bool bTreeNode = false;
+
+			// First Row
 			{
-				if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
-				{
-					action.m_Name = m_NewActionName;
-					m_RenamingAction = nullptr;
-				}
+				ImGui::TableSetColumnIndex(0);
+				ImGui::AlignTextToFramePadding();
 
-				ImGui::SameLine();
-				ImGui::SetNextItemWidth(-FLT_MIN);
-				ImGui::InputString("NewName", m_NewActionName);
+				if (action.m_Options.size() != 0)
+					bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
+				else
+					ImGui::BulletText(actionName.c_str());
+
+				ImGui::TableSetColumnIndex(1);
+
+				if (m_RenamingAction == &action)
+				{
+					if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
+					{
+						action.m_Name = m_NewActionName;
+						m_RenamingAction = nullptr;
+					}
+
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					ImGui::InputString("NewName", m_NewActionName);
+				}
+				else if (m_DeletingAction == &action)
+				{
+					if (ImGui::IconButton(ICON_FA_CHECK))
+						b_DeleteConfirmed = true;
+
+					ImGui::SameLine(0.f, 3);
+					if (ImGui::IconButton(ICON_FA_XMARK))
+						m_DeletingAction = nullptr;
+				}
+				else
+				{
+					// Run
+					if (ImGui::IconButton(ICON_FA_PLAY))
+						ActionsManager::get()->executeAction(action);
+
+					// Move Up
+					ImGui::SameLine(0.f, 3);
+					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
+					{
+						swapIndex1 = i;
+						swapIndex2 = i - 1;
+					}
+
+					// Move Down
+					ImGui::SameLine(0.f, 3);
+					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
+					{
+						swapIndex1 = i;
+						swapIndex2 = i + 1;
+					}
+
+					// Rename
+					ImGui::SameLine(0.f, 3);
+					if (ImGui::IconButton(ICON_FA_PEN))
+					{
+						m_RenamingAction = &action;
+						m_NewActionName = actionName;
+					}
+
+					// Delete
+					ImGui::SameLine(0.f, 3);
+					if (ImGui::IconButton(ICON_FA_TRASH))
+					{
+						m_DeletingAction = &action;
+						b_DeleteConfirmed = false;
+					}
+				}
 			}
-			else
+
+			// Show Options
+			if (bTreeNode)
 			{
-				if (ImGui::IconButton(ICON_FA_PLAY))
-					ActionsManager::get()->executeAction(action);
+				auto& options = action.m_Options;
+				std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
 
-				ImGui::SameLine(0.f, 3);
-				if (ImGui::IconButton(ICON_FA_PEN))
-				{
-					m_RenamingAction = &action;
-					m_NewActionName = actionName;
-				}
+				ImGui::TreePop();
 			}
+
+			ImGui::PopID();
 		}
 
-		// Show Options
-		if (bTreeNode)
-		{
-			auto& options = action.m_Options;
-			std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
+		ImGui::EndTable();
 
-			ImGui::TreePop();
+		// Swap if needed
+		if (swapIndex1 != -1 && swapIndex2 != -1)
+		{
+			const auto tmp = actions[swapIndex1];
+			actions[swapIndex1] = actions[swapIndex2];
+			actions[swapIndex2] = tmp;
 		}
 
-		ImGui::PopID();
+		// Perform Delete at the end of tick
+		if (m_DeletingAction != nullptr && b_DeleteConfirmed)
+		{
+			auto actionToErase = std::remove_if(actions.begin(), actions.end(), [this](auto& elem) { return &elem == m_DeletingAction; });
+			actions.erase(actionToErase);
+
+			// Reset
+			m_DeletingAction = nullptr;
+			b_DeleteConfirmed = false;
+		}
     }
 
     void ActionsScreen::renderActionBuilder()

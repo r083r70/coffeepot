@@ -18,7 +18,6 @@ namespace coffeepot
 
     private:
         void renderActions();
-		void renderAction(Action& action);
 		void renderOption(Option& option);
 
         void renderActionBuilder();
@@ -31,5 +30,9 @@ namespace coffeepot
         // Rename
 		Action* m_RenamingAction = nullptr;
 		std::string m_NewActionName;
+
+		// Delete
+        Action* m_DeletingAction = nullptr;
+        bool b_DeleteConfirmed = false;
     };
 }
