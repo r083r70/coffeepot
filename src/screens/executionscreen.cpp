@@ -3,6 +3,7 @@
 
 #include "core/actionmanager.h"
 #include "fa_icons.h"
+#include "utils/utils.h"
 
 #include "imgui.h"
 #include <cassert>
@@ -32,8 +33,9 @@ namespace coffeepot
     }
 
     void ExecutionScreen::tickFooter()
-    {
-        if (ImGui::Button("Kill All"))
+	{
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() * 0.5 - 10);
+        if (ImGui::IconButton(ICON_FA_SKULL))
             ActionsManager::get()->killExecution();
 	}
 

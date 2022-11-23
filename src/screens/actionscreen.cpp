@@ -87,7 +87,6 @@ namespace coffeepot
 			return bResult;
 		};
 
-
 		for (int32_t i = 0; i < actions.size(); i++)
 		{
 			Action& action = actions[i];
@@ -143,20 +142,20 @@ namespace coffeepot
 					ImGui::SameLine(0.f, 2);
 					ImGui::Text("|");
 
+					// Move Down
+					ImGui::SameLine(0.f, 2);
+					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
+					{
+						swapIndex1 = i;
+						swapIndex2 = i + 1;
+					}
+
 					// Move Up
 					ImGui::SameLine(0.f, 2);
 					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
 					{
 						swapIndex1 = i;
 						swapIndex2 = i - 1;
-					}
-
-					// Move Down
-					ImGui::SameLine(0.f, 3);
-					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
-					{
-						swapIndex1 = i;
-						swapIndex2 = i + 1;
 					}
 
 					// Rename
@@ -169,7 +168,7 @@ namespace coffeepot
 
 					// Delete
 					ImGui::SameLine(0.f, 3);
-					if (ImGui::IconButton(ICON_FA_TRASH))
+					if (ImGui::IconButton(ICON_FA_TRASH_CAN))
 					{
 						m_DeletingAction = &action;
 						b_DeleteConfirmed = false;

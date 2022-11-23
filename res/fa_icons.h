@@ -450,7 +450,7 @@
 #define ICON_FA_ENVELOPE_OPEN "\xef\x8a\xb6"	// U+f2b6
 #define ICON_FA_ENVELOPE_OPEN_TEXT "\xef\x99\x98"	// U+f658
 #define ICON_FA_ENVELOPES_BULK "\xef\x99\xb4"	// U+f674
-#define ICON_FA_EQUALS "="	// U+003d
+#define ICON_FA_EQUALS "\xef\x94\xac"	// U+f52c
 #define ICON_FA_ERASER "\xef\x84\xad"	// U+f12d
 #define ICON_FA_ETHERNET "\xef\x9e\x96"	// U+f796
 #define ICON_FA_EURO_SIGN "\xef\x85\x93"	// U+f153

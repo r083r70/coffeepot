@@ -8,6 +8,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace coffeepot
 {
@@ -40,7 +41,7 @@ namespace coffeepot
 		ImGui::EndTable();
 
         // Perform Delete at the end of tick
-		if (m_DeletingPlaylist != nullptr)
+		if (m_DeletingPlaylist != nullptr && b_DeleteConfirmed)
 		{
             auto playlistToErase = std::remove_if(playlists.begin(), playlists.end(), [this](auto& elem) { return &elem == m_DeletingPlaylist; });
             playlists.erase(playlistToErase);
@@ -116,7 +117,7 @@ namespace coffeepot
 
 				// Delete
 				ImGui::SameLine(0.f, 3);
-                if (ImGui::IconButton(ICON_FA_TRASH))
+                if (ImGui::IconButton(ICON_FA_TRASH_CAN))
 				{
 					m_DeletingPlaylist = &playlist;
 					b_DeleteConfirmed = false;
@@ -140,6 +141,10 @@ namespace coffeepot
 
 			for (int32_t i = 0; i < actions.size(); i++)
 			{
+				// Add Action at Index
+				if (m_ExpandingPlaylist == &playlist && m_ExpansionIndex == i)
+					renderPlaylistExpansion();
+
 				Action& action = actions[i];
 				const bool bIsFirst = i == 0;
 				const bool bIsLast = i == actions.size() - 1;
@@ -182,20 +187,20 @@ namespace coffeepot
 						m_ExpansionIndex = i;
 					}
 
-					// Move Up
-					ImGui::SameLine(0.f, 3);
-					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
-					{
-						swapIndex1 = i;
-						swapIndex2 = i - 1;
-					}
-
 					// Move Down
 					ImGui::SameLine(0.f, 3);
 					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
 					{
 						swapIndex1 = i;
 						swapIndex2 = i + 1;
+					}
+
+					// Move Up
+					ImGui::SameLine(0.f, 3);
+					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
+					{
+						swapIndex1 = i;
+						swapIndex2 = i - 1;
 					}
 
 					// Remove
@@ -214,11 +219,11 @@ namespace coffeepot
 				}
 
 				ImGui::PopID();
-
-				// Add Action at Index
-				if (m_ExpandingPlaylist == &playlist && m_ExpansionIndex == i)
-					renderPlaylistExpansion();
 			}
+
+			// Add Action at Last
+			if (m_ExpandingPlaylist == &playlist && m_ExpansionIndex == actions.size())
+				renderPlaylistExpansion();
 
 			// Swap if needed
 			if (swapIndex1 != -1 && swapIndex2 != -1)
@@ -230,12 +235,17 @@ namespace coffeepot
 
 			// Remove if needed
 			if (removeIndex != -1)
+			{
 				actions.erase(actions.begin() + removeIndex);
+
+				if (m_ExpansionIndex > removeIndex)
+					m_ExpansionIndex--;
+			}
 
 			ImGui::TreePop(); // ShowActions|End
 		}
 
-		// Add Action at bottom
+		// Add Action (no index)
 		if (m_ExpandingPlaylist == &playlist && m_ExpansionIndex == -1)
 			renderPlaylistExpansion();
 
@@ -252,14 +262,16 @@ namespace coffeepot
 		ImGui::AlignTextToFramePadding();
 		ImGui::SetNextItemWidth(-FLT_MIN);
 
+		auto& allActions = ActionsManager::get()->Actions;
+		auto& playlistActions = playlist.getActions();
 		Action action;
-		if (ImGui::ComboBoxActions("SelectAction", action, ActionsManager::get()->Actions))
+
+		if (ImGui::ComboBoxActions("SelectAction", action, allActions))
 		{
-			auto& actions = playlist.getActions();
 			if (m_ExpansionIndex != -1)
-				actions.insert(actions.begin() + 1 + m_ExpansionIndex, action);
+				playlistActions.insert(playlistActions.begin() + m_ExpansionIndex, action);
 			else
-				actions.push_back(action);
+				playlistActions.push_back(action);
 
 			m_ExpandingPlaylist = nullptr;
 			m_ExpansionIndex = -1;
@@ -267,11 +279,35 @@ namespace coffeepot
 
 		ImGui::TableSetColumnIndex(1);
 		ImGui::AlignTextToFramePadding();
+
+		if (m_ExpansionIndex != -1)
+		{
+			const bool bIsFirst = m_ExpansionIndex == 0;
+			const bool bIsLast = m_ExpansionIndex == playlistActions.size();
+			const auto DrawIconButtonEx = [](const char* label, bool bEnabled) -> bool
+			{
+				ImGui::BeginDisabled(!bEnabled);
+				const bool bResult = ImGui::IconButton(label);
+				ImGui::EndDisabled();
+				return bResult;
+			};
+
+			// Move Down
+			if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
+				m_ExpansionIndex++;
+
+			// Move Up
+			ImGui::SameLine(0.f, 3);
+			if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
+				m_ExpansionIndex--;
+
+			ImGui::SameLine(0.f, 3);
+		}
+
 		if (ImGui::IconButton(ICON_FA_XMARK))
 		{
 			m_ExpandingPlaylist = nullptr;
 			m_ExpansionIndex = -1;
 		}
 	}
-
 }

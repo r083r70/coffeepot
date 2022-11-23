@@ -2,6 +2,8 @@
 #include "logscreen.h"
 
 #include "core/actionmanager.h"
+#include "fa_icons.h"
+#include "utils/utils.h"
 
 namespace coffeepot
 {   
@@ -23,11 +25,17 @@ namespace coffeepot
     }
 
     void LogScreen::tickFooter()
-    {
-        if (ImGui::Button("Clear"))
-            m_TextBuffer.clear();
+	{
+		if (ImGui::IconButton(ICON_FA_ERASER))
+			m_TextBuffer.clear();
 
-        ImGui::SameLine();
-        ImGui::Checkbox("AutoScroll", &b_AutoScrollDown);
+		ImGui::SameLine(0.f, 2);
+		ImGui::Text("|");
+
+		ImGui::SameLine(0.f, 2);
+        if (b_AutoScrollDown)
+		    ImGui::Checkbox(ICON_FA_ANGLES_DOWN, &b_AutoScrollDown);
+		else
+			ImGui::Checkbox(ICON_FA_EQUALS, &b_AutoScrollDown);
     }
 }
