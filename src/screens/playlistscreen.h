@@ -18,7 +18,7 @@ namespace coffeepot
         void renderPlaylists();
 		void renderPlaylist(Playlist& playlist);
 
-        bool renderActionSelector(Action& outAction);
+        void renderPlaylistExpansion();
     
     private:
         // Rename

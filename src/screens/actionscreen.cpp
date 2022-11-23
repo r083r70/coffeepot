@@ -98,7 +98,7 @@ namespace coffeepot
 			const std::string& actionName = action.m_Name;
 
 			ImGui::TableNextRow();
-			bool bTreeNode = false;
+			bool bShowOptions = false;
 
 			// Action Name
 			{
@@ -106,7 +106,7 @@ namespace coffeepot
 				ImGui::AlignTextToFramePadding();
 
 				if (action.m_Options.size() != 0)
-					bTreeNode = ImGui::TreeNode("Action", actionName.c_str());
+					bShowOptions = ImGui::TreeNode("Action", actionName.c_str());
 				else
 					ImGui::BulletText(actionName.c_str());
 
@@ -178,7 +178,7 @@ namespace coffeepot
 			}
 
 			// Show Options
-			if (bTreeNode)
+			if (bShowOptions)
 			{
 				auto& options = action.m_Options;
 				std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });

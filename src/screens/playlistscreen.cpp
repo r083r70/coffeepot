@@ -56,7 +56,7 @@ namespace coffeepot
 		ImGui::PushID(&playlist);
 		const std::string& playlistName = playlist.m_Name;
 
-        bool bPlaylistTreeNode = false;
+        bool bShowActions = false;
 
 		ImGui::TableNextRow();
 
@@ -64,7 +64,7 @@ namespace coffeepot
 		{
 			ImGui::TableSetColumnIndex(0);
 			ImGui::AlignTextToFramePadding();
-			bPlaylistTreeNode = ImGui::TreeNode("Playlist", playlistName.c_str());
+			bShowActions = ImGui::TreeNode("Playlist", playlistName.c_str());
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::AlignTextToFramePadding();
@@ -124,8 +124,8 @@ namespace coffeepot
 			}
 		}
 
-		// Actions
-		if (bPlaylistTreeNode)
+		// Show Actions
+		if (bShowActions)
 		{
 			auto& actions = playlist.getActions();
 
@@ -148,7 +148,7 @@ namespace coffeepot
 				const std::string& actionName = action.m_Name;
 
 				ImGui::TableNextRow();
-				bool bActionTreeNode = false;
+				bool bShowOptions = false;
 
 				// Action Name
 				{
@@ -157,7 +157,7 @@ namespace coffeepot
 					ImGui::AlignTextToFramePadding();
 
 					if (action.m_Options.size() != 0)
-						bActionTreeNode = ImGui::TreeNode("Action", actionName.c_str());
+						bShowOptions = ImGui::TreeNode("Action", actionName.c_str());
 					else
 						ImGui::BulletText(actionName.c_str());
 
@@ -179,7 +179,7 @@ namespace coffeepot
 					if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
 					{
 						m_ExpandingPlaylist = &playlist;
-						m_ExpansionIndex = i + 1;
+						m_ExpansionIndex = i;
 					}
 
 					// Move Up
@@ -205,18 +205,20 @@ namespace coffeepot
 				}
 
 				// Show Options
-				if (bActionTreeNode)
+				if (bShowOptions)
 				{
 					auto& options = action.m_Options;
 					std::for_each(options.begin(), options.end(), [](auto& elem) { ImGui::OptionRow(elem); });
 
-					ImGui::TreePop(); // ActionTree
+					ImGui::TreePop(); // ShowOptions|End
 				}
 
 				ImGui::PopID();
-			}
 
-			ImGui::TreePop(); // PlaylistTree
+				// Add Action at Index
+				if (m_ExpandingPlaylist == &playlist && m_ExpansionIndex == i)
+					renderPlaylistExpansion();
+			}
 
 			// Swap if needed
 			if (swapIndex1 != -1 && swapIndex2 != -1)
@@ -229,38 +231,47 @@ namespace coffeepot
 			// Remove if needed
 			if (removeIndex != -1)
 				actions.erase(actions.begin() + removeIndex);
+
+			ImGui::TreePop(); // ShowActions|End
 		}
 
-		// Add Action
-		if (m_ExpandingPlaylist == &playlist)
-		{
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::AlignTextToFramePadding();
-			ImGui::SetNextItemWidth(-FLT_MIN);
-
-			Action action;
-			if (ImGui::ComboBoxActions("SelectAction", action, ActionsManager::get()->Actions))
-			{
-				auto& actions = playlist.getActions();
-				if (m_ExpansionIndex != -1)
-					actions.insert(actions.begin() + m_ExpansionIndex, action);
-				else
-					actions.push_back(action);
-
-				m_ExpandingPlaylist = nullptr;
-				m_ExpansionIndex = -1;
-			}
-
-			ImGui::TableSetColumnIndex(1);
-			ImGui::AlignTextToFramePadding();
-			if (ImGui::IconButton(ICON_FA_XMARK))
-			{
-				m_ExpandingPlaylist = nullptr;
-				m_ExpansionIndex = -1;
-			}
-		}
+		// Add Action at bottom
+		if (m_ExpandingPlaylist == &playlist && m_ExpansionIndex == -1)
+			renderPlaylistExpansion();
 
 		ImGui::PopID();
     }
+
+	void PlaylistScreen::renderPlaylistExpansion()
+	{
+		assert(m_ExpandingPlaylist != nullptr);
+		Playlist& playlist = *m_ExpandingPlaylist;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::AlignTextToFramePadding();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+
+		Action action;
+		if (ImGui::ComboBoxActions("SelectAction", action, ActionsManager::get()->Actions))
+		{
+			auto& actions = playlist.getActions();
+			if (m_ExpansionIndex != -1)
+				actions.insert(actions.begin() + 1 + m_ExpansionIndex, action);
+			else
+				actions.push_back(action);
+
+			m_ExpandingPlaylist = nullptr;
+			m_ExpansionIndex = -1;
+		}
+
+		ImGui::TableSetColumnIndex(1);
+		ImGui::AlignTextToFramePadding();
+		if (ImGui::IconButton(ICON_FA_XMARK))
+		{
+			m_ExpandingPlaylist = nullptr;
+			m_ExpansionIndex = -1;
+		}
+	}
+
 }
