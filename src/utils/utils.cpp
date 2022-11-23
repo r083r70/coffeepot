@@ -114,39 +114,4 @@ namespace ImGui
 
 		ImGui::PopID();
     }
-
-    BuilderFooterResult BuilderFooter(const char* label, bool& value)
-    {
-        if (value)
-        {
-            std::string saveButton = "Save ";
-            saveButton += label;
-
-            if (ImGui::Button(saveButton.c_str()))
-            {
-                value = false;
-                return BuilderFooterResult::Save;
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel"))
-            {
-                value = false;
-                return BuilderFooterResult::Cancel;
-            }
-        }
-        else
-        {
-            std::string createButton = "Create new ";
-            createButton += label;
-
-            if (ImGui::Button(createButton.c_str()))
-            {
-                value = true;
-                return BuilderFooterResult::Start;
-            }
-        }
-
-        return BuilderFooterResult::None;
-    }
 }

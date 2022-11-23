@@ -19,15 +19,5 @@ namespace ImGui
     bool IconButton(const char* label);
 
     void OptionRow(coffeepot::Option& option);
-
-    enum class BuilderFooterResult
-    {
-        None,
-        Save,
-        Cancel,
-        Start
-    };
-
-    BuilderFooterResult BuilderFooter(const char* label, bool& value);
 }
 

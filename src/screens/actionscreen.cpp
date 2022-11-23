@@ -8,6 +8,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <random>
 
 namespace coffeepot
 {
@@ -25,26 +26,46 @@ namespace coffeepot
             renderActions();
     }
     
-    void ActionsScreen::tickFooter()
-    {
-        switch (ImGui::BuilderFooter("Action", b_CreatingAction))
-        {
-            case ImGui::BuilderFooterResult::Save:
-                
-                // Finalize ActionTemplate: set Default value
-                for (auto& option : m_ActionTemplate.m_Options)
+	void ActionsScreen::tickFooter()
+	{
+		if (b_CreatingAction)
+		{
+			if (ImGui::Button("Save Action"))
+			{
+				// Finalize options
+				for (auto& option : m_ActionTemplate.m_Options)
 				{
 					option.m_Value = option.m_Details.m_ValueList[0];
 					option.b_Active = option.m_Details.m_Electivity == Electivity::Required;
 				}
 
-                ActionsManager::get()->Actions.push_back(m_ActionTemplate);
-                break;
-            case ImGui::BuilderFooterResult::Start:
-                m_ActionTemplate = Action{};
-                break;
-        }
-    }
+				ActionsManager::get()->Actions.push_back(m_ActionTemplate);
+				b_CreatingAction = false;
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+				b_CreatingAction = false;
+		}
+		else
+		{
+			if (ImGui::Button("Create new Action"))
+			{
+				static std::random_device randomDevice;
+				static std::mt19937 engine{ randomDevice() };
+				static std::uniform_int_distribution<int32_t> UniformDistribution{};
+
+				// Init a Action
+				m_ActionTemplate = Action{};
+				m_ActionTemplate.m_ID = UniformDistribution(engine);
+
+				b_CreatingAction = true;
+			}
+
+			// #TODO
+			// Create from template
+		}
+	}
     
     void ActionsScreen::renderActions()
     {
