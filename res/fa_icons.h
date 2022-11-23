@@ -988,7 +988,7 @@
 #define ICON_FA_PLUG_CIRCLE_MINUS "\xee\x95\x9e"	// U+e55e
 #define ICON_FA_PLUG_CIRCLE_PLUS "\xee\x95\x9f"	// U+e55f
 #define ICON_FA_PLUG_CIRCLE_XMARK "\xee\x95\xa0"	// U+e560
-#define ICON_FA_PLUS "+"	// U+002b
+#define ICON_FA_PLUS "\xef\x81\xa7"	// U+f067
 #define ICON_FA_PLUS_MINUS "\xee\x90\xbc"	// U+e43c
 #define ICON_FA_PODCAST "\xef\x8b\x8e"	// U+f2ce
 #define ICON_FA_POO "\xef\x8b\xbe"	// U+f2fe

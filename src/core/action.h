@@ -50,7 +50,7 @@ namespace coffeepot
     struct Action
     {
 	public:
-        int32_t m_ID;
+        int32_t m_ID = -1;
         std::string m_Name;
 
         std::string m_Command;
@@ -58,6 +58,6 @@ namespace coffeepot
 
 	public:
 		std::string createFullCommand() const;
-		std::string getOptionValueByID(int32_t id) const;
+        std::string getOptionValueByID(int32_t id) const;
     };
 }

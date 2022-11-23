@@ -128,17 +128,12 @@ namespace coffeepot
         return result;
     }
 
-    std::string Action::getOptionValueByID(int32_t id) const
+	std::string Action::getOptionValueByID(int32_t id) const
 	{
         for (const auto& option : m_Options)
         {
-            if (option.m_Details.m_ID != id)
-                continue;
-
-			if (!option.b_Active)
-				break;
-
-            return option.m_Details.m_Prefix + option.m_Value;
+            if (option.m_Details.m_ID == id && option.b_Active)
+                return option.m_Details.m_Prefix + option.m_Value;
         }
 
         return "";

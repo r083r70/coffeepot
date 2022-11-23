@@ -22,8 +22,11 @@ namespace coffeepot
 
     void PlaylistScreen::tickFooter()
 	{
-		if (ImGui::Button("Create new Playlist"))
-			ActionsManager::get()->Playlists.emplace_back();
+		if (ImGui::IconButton(ICON_FA_PLUS))
+		{
+			auto& playlist = ActionsManager::get()->Playlists.emplace_back();
+			playlist.m_Name = "New Playlist";
+		}
     }
     
     void PlaylistScreen::renderPlaylists()
@@ -64,6 +67,7 @@ namespace coffeepot
 			bPlaylistTreeNode = ImGui::TreeNode("Playlist", playlistName.c_str());
 
 			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
             if (m_RenamingPlaylist == &playlist)
             {
 				if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
@@ -91,9 +95,12 @@ namespace coffeepot
 				if (ImGui::IconButton(ICON_FA_PLAY))
 					ActionsManager::get()->executePlaylist(playlist);
 
+				ImGui::SameLine(0.f, 2);
+				ImGui::Text("|");
+
 				// Add Action
-				ImGui::SameLine(0.f, 3);
-				if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
+				ImGui::SameLine(0.f, 2);
+				if (ImGui::IconButton(ICON_FA_PLUS))
 				{
 					m_ExpandingPlaylist = &playlist;
 					m_ExpansionIndex = -1;
@@ -156,9 +163,20 @@ namespace coffeepot
 
 					// Second Column
 					ImGui::TableSetColumnIndex(1);
+					ImGui::AlignTextToFramePadding();
+
+					// Execute
+					if (ImGui::IconButton(ICON_FA_CIRCLE_PLAY))
+					{
+						ActionsManager::get()->executeAction(action);
+					}
+
+					ImGui::SameLine(0.f, 2);
+					ImGui::Text("|");
 
 					// Add
-					if (ImGui::IconButton(ICON_FA_SQUARE_PLUS))
+					ImGui::SameLine(0.f, 2);
+					if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
 					{
 						m_ExpandingPlaylist = &playlist;
 						m_ExpansionIndex = i + 1;
@@ -184,13 +202,6 @@ namespace coffeepot
 					ImGui::SameLine(0.f, 3);
 					if (ImGui::IconButton(ICON_FA_XMARK))
 						removeIndex = i;
-
-					// Execute
-					ImGui::SameLine(0.f, 3);
-					if (ImGui::IconButton(ICON_FA_PLAY))
-					{
-						ActionsManager::get()->executeAction(action);
-					}
 				}
 
 				// Show Options
@@ -226,19 +237,10 @@ namespace coffeepot
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text("Choose Action:");
-
-			ImGui::TableSetColumnIndex(1);
-
-			if (ImGui::IconButton(ICON_FA_DELETE_LEFT))
-			{
-				m_ExpandingPlaylist = nullptr;
-				m_ExpansionIndex = -1;
-			}
+			ImGui::SetNextItemWidth(-FLT_MIN);
 
 			Action action;
-			ImGui::SameLine();
-			if (renderActionSelector(action))
+			if (ImGui::ComboBoxActions("SelectAction", action, ActionsManager::get()->Actions))
 			{
 				auto& actions = playlist.getActions();
 				if (m_ExpansionIndex != -1)
@@ -249,27 +251,16 @@ namespace coffeepot
 				m_ExpandingPlaylist = nullptr;
 				m_ExpansionIndex = -1;
 			}
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
+			if (ImGui::IconButton(ICON_FA_XMARK))
+			{
+				m_ExpandingPlaylist = nullptr;
+				m_ExpansionIndex = -1;
+			}
 		}
 
 		ImGui::PopID();
-    }
-
-    bool PlaylistScreen::renderActionSelector(Action& outAction)
-	{
-		if (!ImGui::BeginCombo("", "Select.."))
-			return false;
-
-		bool bSelected = false;
-        for (const auto& action : ActionsManager::get()->Actions)
-        {
-            if (ImGui::Selectable(action.m_Name.c_str(), false))
-            {
-				outAction = action;
-				bSelected = true;
-            }
-        }
-
-        ImGui::EndCombo();
-		return bSelected;
     }
 }

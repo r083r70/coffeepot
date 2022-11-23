@@ -8,6 +8,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <map>
 #include <random>
 
 namespace coffeepot
@@ -30,9 +31,13 @@ namespace coffeepot
 	{
 		if (b_CreatingAction)
 		{
-			if (ImGui::Button("Save Action"))
+			if (ImGui::IconButton(ICON_FA_CHECK))
 			{
-				// Finalize options
+				// Set a Name if not was given
+				if (m_ActionTemplate.m_Name.empty())
+					m_ActionTemplate.m_Name = "New Action";
+
+				// Finalize Options
 				for (auto& option : m_ActionTemplate.m_Options)
 				{
 					option.m_Value = option.m_Details.m_ValueList[0];
@@ -44,26 +49,25 @@ namespace coffeepot
 			}
 
 			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
+			if (ImGui::IconButton(ICON_FA_XMARK))
 				b_CreatingAction = false;
 		}
 		else
 		{
-			if (ImGui::Button("Create new Action"))
+			ImGui::ComboBoxActions("SelectTemplateAction", m_ActionTemplate, ActionsManager::get()->Actions, /*bShowEmpty =*/ true);
+
+			ImGui::SameLine();
+			if (ImGui::IconButton(ICON_FA_PLUS))
 			{
 				static std::random_device randomDevice;
 				static std::mt19937 engine{ randomDevice() };
 				static std::uniform_int_distribution<int32_t> UniformDistribution{};
 
 				// Init a Action
-				m_ActionTemplate = Action{};
 				m_ActionTemplate.m_ID = UniformDistribution(engine);
-
+				m_ActionTemplate.m_Name = "New Action";
 				b_CreatingAction = true;
 			}
-
-			// #TODO
-			// Create from template
 		}
 	}
     
@@ -96,7 +100,7 @@ namespace coffeepot
 			ImGui::TableNextRow();
 			bool bTreeNode = false;
 
-			// First Row
+			// Action Name
 			{
 				ImGui::TableSetColumnIndex(0);
 				ImGui::AlignTextToFramePadding();
@@ -107,6 +111,7 @@ namespace coffeepot
 					ImGui::BulletText(actionName.c_str());
 
 				ImGui::TableSetColumnIndex(1);
+				ImGui::AlignTextToFramePadding();
 
 				if (m_RenamingAction == &action)
 				{
@@ -135,8 +140,11 @@ namespace coffeepot
 					if (ImGui::IconButton(ICON_FA_PLAY))
 						ActionsManager::get()->executeAction(action);
 
+					ImGui::SameLine(0.f, 2);
+					ImGui::Text("|");
+
 					// Move Up
-					ImGui::SameLine(0.f, 3);
+					ImGui::SameLine(0.f, 2);
 					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
 					{
 						swapIndex1 = i;
@@ -203,50 +211,68 @@ namespace coffeepot
 		}
     }
 
-    void ActionsScreen::renderActionBuilder()
+	void ActionsScreen::renderActionBuilder()
     {
         ImGui::PushID(&m_ActionTemplate);
         if (!ImGui::BeginTable("", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable))
             return;
         
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-		ImGui::AlignTextToFramePadding();
-        ImGui::Text("Name");
-        ImGui::TableSetColumnIndex(1);
-		ImGui::InputString("ActionName", m_ActionTemplate.m_Name);
+		// Name
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+			ImGui::Text("Name");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-		ImGui::AlignTextToFramePadding();
-        ImGui::Text("Command");
-        ImGui::TableSetColumnIndex(1);
-		ImGui::InputString("ActionCommand", m_ActionTemplate.m_Command);
+			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::InputString("ActionName", m_ActionTemplate.m_Name);
+		}
 
+		// Command
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+			ImGui::Text("Command");
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::InputString("ActionCommand", m_ActionTemplate.m_Command);
+		}
+
+		// Show Options
         if (m_ActionTemplate.m_Options.size() != 0)
-        {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-		    ImGui::AlignTextToFramePadding();
-            ImGui::Text("Options");
-
-            auto& options = m_ActionTemplate.m_Options;
+		{
+			auto& options = m_ActionTemplate.m_Options;
             std::for_each(options.begin(), options.end(), [this](auto& elem) { renderOptionBuilder(elem.m_Details); });
-        }
+		}
+
+		// Manage Options
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::AlignTextToFramePadding();
+
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 43);
+			if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
+			{
+				Option& newOption = m_ActionTemplate.m_Options.emplace_back();
+				newOption.m_Details.m_ID = static_cast<int32_t>(m_ActionTemplate.m_Options.size());
+				newOption.m_Details.m_Name = "New Option";
+				newOption.m_Details.m_ValueList.emplace_back(""); // Add a Value as the Default one
+			}
+
+			ImGui::SameLine(0.f, 2);
+			ImGui::BeginDisabled(m_ActionTemplate.m_Options.empty());
+			if (ImGui::IconButton(ICON_FA_CIRCLE_MINUS))
+				m_ActionTemplate.m_Options.pop_back();
+			ImGui::EndDisabled();
+		}
 
         ImGui::EndTable();
-        ImGui::Separator();
-
-        if (ImGui::Button("Add Option"))
-        {
-            Option& newOption = m_ActionTemplate.m_Options.emplace_back();
-			newOption.m_Details.m_ID = static_cast<int32_t>(m_ActionTemplate.m_Options.size());
-			newOption.m_Details.m_Name = "optionName";
-			newOption.m_Details.m_Electivity = Electivity::Required;
-			newOption.m_Details.m_InputType = InputType::Text;
-			newOption.m_Details.m_ValueList.emplace_back("");
-        }
-
         ImGui::PopID();
     }
 
@@ -265,14 +291,16 @@ namespace coffeepot
             ImGui::SameLine();
 
             horizontalAlignment = ImGui::GetCursorPosX(); // for alignment
-			ImGui::Text("Name");
+			ImGui::Text("Option Name");
 
 			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetNextItemWidth(-FLT_MIN);
 			ImGui::InputString("OptionName", optionDetails.m_Name);
 		}
 
 		// 2nd line: Electivity
-        {
+		{
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
@@ -281,18 +309,11 @@ namespace coffeepot
 			ImGui::Text("Electivity");
 
 			ImGui::TableSetColumnIndex(1);
-
-			static_assert(sizeof(Electivity) == sizeof(int32_t));
-			if (ImGui::InputInt("Electivity", (int32_t*)&optionDetails.m_Electivity))
-			{
-                auto intValue = static_cast<int32_t>(optionDetails.m_Electivity);
-				if (intValue < 0 || intValue > 1)
-					optionDetails.m_Electivity = Electivity::Required;
-			}
-
-			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-				ImGui::SetTooltip("%d: %s\n%d: %s", 0, "Required", 1, "Optional");
-        }
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			const std::map<Electivity, const char*> Electivities = { { Electivity::Required, "Required" }, { Electivity::Optional, "Optional" } };
+			ImGui::ComboBoxEnums("Electivity", optionDetails.m_Electivity, Electivities);
+		}
 
 		// 3rd line: InputType
 		{
@@ -301,24 +322,17 @@ namespace coffeepot
 			ImGui::TableSetColumnIndex(0);
 			ImGui::AlignTextToFramePadding();
 			ImGui::SetCursorPosX(horizontalAlignment); // align to previous line
-			ImGui::Text("InputType");
+			ImGui::Text("Type");
 
 			ImGui::TableSetColumnIndex(1);
-
-			static_assert(sizeof(InputType) == sizeof(int32_t));
-			if (ImGui::InputInt("InputType", (int32_t*)&optionDetails.m_InputType))
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			const std::map<InputType, const char*> InputTypes = { { InputType::Text, "Text" }, { InputType::MultiInput, "MultiInput" }, { InputType::ComboBox, "ComboBox" }, { InputType::Fixed, "Fixed" } };
+			if (ImGui::ComboBoxEnums("InputText", optionDetails.m_InputType, InputTypes))
 			{
-				auto intValue = static_cast<int32_t>(optionDetails.m_InputType);
-				if (intValue < 0 || intValue > 3)
-					optionDetails.m_InputType = InputType::Text;
-
-                // Only ComboBox allows multiple elements in the ValueList
 				if (optionDetails.m_InputType != InputType::ComboBox && optionDetails.m_ValueList.size() > 1)
 					optionDetails.m_ValueList.resize(1);
 			}
-
-			if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
-				ImGui::SetTooltip("%d: %s\n%d: %s\n%d: %s\n%d: %s", 0, "Text", 1, "OptionalText", 2, "ComboBox", 3, "Fixed");
 		}
 
 		// 4th line: Prefix
@@ -331,6 +345,8 @@ namespace coffeepot
 			ImGui::Text("Prefix");
 
 			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
+			ImGui::SetNextItemWidth(-FLT_MIN);
             ImGui::InputString("Prefix", optionDetails.m_Prefix);
 		}
 
@@ -341,19 +357,36 @@ namespace coffeepot
 			ImGui::TableSetColumnIndex(0);
 			ImGui::AlignTextToFramePadding();
 			ImGui::SetCursorPosX(horizontalAlignment); // align to previous line
-			ImGui::Text("ValueList");
+
+			if (optionDetails.m_InputType == InputType::ComboBox)
+				ImGui::Text("Values");
+			else
+				ImGui::Text("Default Value");
 
 			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
             
             for (int32_t index = 0; index < optionDetails.m_ValueList.size(); index++)
 			{
 				ImGui::PushID(index);
+				ImGui::SetNextItemWidth(-FLT_MIN);
 				ImGui::InputString("Value", optionDetails.m_ValueList[index]);
                 ImGui::PopID();
 			}
 
-			if (optionDetails.m_InputType == InputType::ComboBox && ImGui::Button("Add Value"))
-				optionDetails.m_ValueList.emplace_back("");
+			if (optionDetails.m_InputType == InputType::ComboBox)
+			{
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - 43);
+
+				if (ImGui::IconButton(ICON_FA_SQUARE_PLUS))
+					optionDetails.m_ValueList.emplace_back("");
+
+				ImGui::SameLine(0.f, 2);
+				ImGui::BeginDisabled(optionDetails.m_ValueList.size() == 1);
+				if (ImGui::IconButton(ICON_FA_SQUARE_MINUS))
+					optionDetails.m_ValueList.pop_back();
+				ImGui::EndDisabled();
+			}
 		}
 
         ImGui::PopID();

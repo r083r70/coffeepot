@@ -18,8 +18,8 @@ namespace coffeepot
 
     private:
         void renderActions();
-		void renderOption(Option& option);
 
+        void renderTemplateActionSelector(Action& outAction);
         void renderActionBuilder();
         void renderOptionBuilder(OptionDetails& optionDetails);
 

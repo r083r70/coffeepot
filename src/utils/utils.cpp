@@ -27,25 +27,7 @@ namespace ImGui
 		ImGui::PopID();
     }
 
-    void ComboBox(const char* label, std::string& selectedValue, const std::vector<std::string>& selectableValues)
-    {
-		ImGui::PushID(label);
-        if (ImGui::BeginCombo("", selectedValue.c_str()))
-        {
-            for (const auto& value : selectableValues)
-            {
-                bool bSelected = selectedValue == value;
-                ImGui::Selectable(value.c_str(), &bSelected);
-
-                if (bSelected)
-                    selectedValue = value;
-            }
-            ImGui::EndCombo();
-        }
-		ImGui::PopID();
-    }
-
-    bool Checkbox(const char* label, bool& bChecked)
+	bool Checkbox(const char* label, bool& bChecked)
 	{
 		ImGui::PushID(label);
 		const bool bPressed = ImGui::Checkbox("", &bChecked);
@@ -61,6 +43,63 @@ namespace ImGui
 
 		ImGui::GetStyle().FramePadding.x = OldFramePaddingX;
 		return bResult;
+	}
+
+    bool  ComboBoxStrings(const char* label, std::string& selectedValue, const std::vector<std::string>& selectableValues)
+    {
+		ImGui::PushID(label);
+		bool bSelected = false;
+
+        if (ImGui::BeginCombo("", selectedValue.c_str()))
+        {
+            for (const auto& value : selectableValues)
+			{
+				const bool bIsSelectedValue = selectedValue == value;
+                if (ImGui::Selectable(value.c_str(), bIsSelectedValue))
+				{
+					selectedValue = value;
+					bSelected = true;
+				}
+            }
+
+            ImGui::EndCombo();
+        }
+
+		ImGui::PopID();
+		return bSelected;
+    }
+
+	bool ComboBoxActions(const char* label, coffeepot::Action& selectedValue, const std::vector<coffeepot::Action>& selectableValues, bool bShowEmpty /*= false*/)
+	{
+		ImGui::PushID("TemplateActionSelector");
+		bool bSelected = false;
+
+		if (ImGui::BeginCombo("", selectedValue.m_Name.c_str()))
+		{
+			// Empty Action
+			const bool bIsSelectedValueEmpty = selectedValue.m_ID == -1;
+			if (bShowEmpty && ImGui::Selectable("-- Empty --", bIsSelectedValueEmpty))
+			{
+				selectedValue = coffeepot::Action{};
+				bSelected = true;
+			}
+
+			// Existing Actions
+			for (const auto& action : selectableValues)
+			{
+				const bool bIsSelectedValue = selectedValue.m_ID == action.m_ID;
+				if (ImGui::Selectable(action.m_Name.c_str(), bIsSelectedValue))
+				{
+					selectedValue = action;
+					bSelected = true;
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+
+		ImGui::PopID();
+		return bSelected;
 	}
 
 	void OptionRow(coffeepot::Option& option)
@@ -79,6 +118,7 @@ namespace ImGui
 		// > Column 1
 		{
 			ImGui::TableSetColumnIndex(1);
+			ImGui::AlignTextToFramePadding();
 
 			// Checkbox
 			const bool bIsRequired = option.m_Details.m_Electivity == coffeepot::Electivity::Required;
@@ -105,7 +145,7 @@ namespace ImGui
 				break;
 			case coffeepot::InputType::ComboBox:
 				ImGui::SetNextItemWidth(-FLT_MIN);
-				ImGui::ComboBox("OptionValue", option.m_Value, option.m_Details.m_ValueList);
+				ImGui::ComboBoxStrings("OptionValue", option.m_Value, option.m_Details.m_ValueList);
 				break;
 			}
 
