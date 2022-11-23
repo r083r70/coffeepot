@@ -39,9 +39,12 @@ namespace coffeepot
         // Perform Delete at the end of tick
 		if (m_DeletingPlaylist != nullptr)
 		{
-            auto elemToErase = std::remove_if(playlists.begin(), playlists.end(), [this](auto& elem) { return &elem == m_DeletingPlaylist; });
-            playlists.erase(elemToErase);
+            auto playlistToErase = std::remove_if(playlists.begin(), playlists.end(), [this](auto& elem) { return &elem == m_DeletingPlaylist; });
+            playlists.erase(playlistToErase);
+
+			// Reset
 			m_DeletingPlaylist = nullptr;
+			b_DeleteConfirmed = false;
 		}
     }
 
@@ -73,6 +76,15 @@ namespace coffeepot
 				ImGui::SetNextItemWidth(-FLT_MIN);
                 ImGui::InputString("NewName", m_NewPlaylistName);
             }
+			else if (m_DeletingPlaylist == &playlist)
+			{
+				if (ImGui::IconButton(ICON_FA_CHECK))
+					b_DeleteConfirmed = true;
+
+				ImGui::SameLine(0.f, 3);
+				if (ImGui::IconButton(ICON_FA_XMARK))
+					m_DeletingPlaylist = nullptr;
+			}
             else
 			{
 				// Run
@@ -98,7 +110,10 @@ namespace coffeepot
 				// Delete
 				ImGui::SameLine(0.f, 3);
                 if (ImGui::IconButton(ICON_FA_TRASH))
-                    m_DeletingPlaylist = &playlist;
+				{
+					m_DeletingPlaylist = &playlist;
+					b_DeleteConfirmed = false;
+				}
 			}
 		}
 

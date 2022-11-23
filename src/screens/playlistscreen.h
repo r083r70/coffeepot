@@ -27,6 +27,7 @@ namespace coffeepot
 
 		// Delete
         Playlist* m_DeletingPlaylist = nullptr;
+        bool b_DeleteConfirmed = false;
 
 		// Expanding
 		Playlist* m_ExpandingPlaylist = nullptr;
