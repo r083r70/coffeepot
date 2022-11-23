@@ -34,7 +34,7 @@ namespace coffeepot
 
     void ExecutionScreen::tickFooter()
 	{
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() * 0.5 - 10);
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() * 0.5f - 10);
         if (ImGui::IconButton(ICON_FA_SKULL))
             ActionsManager::get()->killExecution();
 	}
