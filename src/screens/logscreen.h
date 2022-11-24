@@ -1,7 +1,7 @@
 #pragma once
 
 #include "screens.h"
-#include "imgui.h"
+#include <vector>
 
 namespace coffeepot
 {
@@ -15,7 +15,7 @@ namespace coffeepot
         virtual void tickFooter() override;
 
     private:
-        ImGuiTextBuffer m_TextBuffer;
+        std::vector<char> m_TextBuffer;
         bool b_AutoScrollDown;
     };
 }

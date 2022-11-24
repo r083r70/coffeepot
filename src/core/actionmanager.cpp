@@ -3,8 +3,7 @@
 
 #include "utils/serializer.h"
 
-#include "imgui.h"
-
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstring>
@@ -19,6 +18,7 @@
 #include <unistd.h>
 #endif
 
+
 namespace coffeepot
 {
     ActionsManager* ActionsManager::s_Instance = nullptr;
@@ -32,7 +32,7 @@ namespace coffeepot
 
 	ActionsManager::ActionsManager()
         : m_ExecutionState()
-        , m_OutputBuffer()
+        , m_Buffer()
         , b_Ending(false)
 	{
 		s_Instance = this;
@@ -96,19 +96,24 @@ namespace coffeepot
         stopCurrentAction();
     }
 
-	void ActionsManager::readOutput(ImGuiTextBuffer& textOutput)
+	void ActionsManager::moveBuffer(std::vector<char>& destination)
     {
         if (!g_OutputMutex.try_lock())
             return;
         
-        char* output = m_OutputBuffer.data();
-        textOutput.append(output); // memcpy the data
-		memset(output, 0, strlen(output)); // clean the data
+        const char* bufferRaw = m_Buffer.data();
+        size_t bufferSize = strlen(bufferRaw);
+
+        // Insert data into the Destination
+        destination.insert(destination.end(), bufferRaw, bufferRaw + bufferSize);
+
+		// Clean the data from the Buffer
+		std::fill(m_Buffer.begin(), m_Buffer.end(), 0);
 
         g_OutputMutex.unlock();
     }
 
-    void ActionsManager::threadedTick()
+	void ActionsManager::threadedTick()
     {
         std::array<char, 2048> localBuffer;
         while (!b_Ending)
@@ -121,25 +126,25 @@ namespace coffeepot
             if (!m_ExecutionState.b_Running)
                 continue;
 
-            size_t outputFreeSize = 0; // Check Output freeSize
+            size_t bufferFreeSize = 0; // Check Buffer freeSize
             {
                 const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
 
-                const size_t outputLength = strlen(m_OutputBuffer.data());
-                outputFreeSize = m_OutputBuffer.size() - outputLength;
+                const size_t bufferLength = strlen(m_Buffer.data());
+                bufferFreeSize = m_Buffer.size() - bufferLength;
             }
 
-            if (outputFreeSize <= 0) // Output is full, retry later
+            if (bufferFreeSize <= 0) // Buffer is full, retry later
                 continue;
 
             // Read in the LocalBuffer and later copy in the Output
 #if CP_WINDOWS
 			DWORD readBytes;
-			if (ReadFile(m_ExecutionState.m_ProcessOutput, localBuffer.data(), outputFreeSize - 1, &readBytes, nullptr))
+			if (ReadFile(m_ExecutionState.m_ProcessOutput, localBuffer.data(), bufferFreeSize - 1, &readBytes, nullptr))
 			{
                 localBuffer[readBytes] = '\0'; // ReadFile doesnt set Termination char
 #elif CP_LINUX
-			if (fgets(localBuffer.data(), outputFreeSize, m_ExecutionState.m_Pipe))
+			if (fgets(localBuffer.data(), bufferFreeSize, m_ExecutionState.m_Pipe))
 			{
 #else
 			if (false)
@@ -147,9 +152,9 @@ namespace coffeepot
 #endif
 			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
 
-                char* output = m_OutputBuffer.data();
-                const size_t outputLength = strlen(output);
-                memcpy(&output[outputLength], localBuffer.data(), outputFreeSize);
+                char* bufferRaw = m_Buffer.data();
+                const size_t bufferLength = strlen(bufferRaw);
+                memcpy(&bufferRaw[bufferLength], localBuffer.data(), bufferFreeSize);
             }
             // Read failed > Action is completed
             else

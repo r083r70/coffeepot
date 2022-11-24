@@ -14,8 +14,6 @@
 #include <wtypes.h>
 #endif
 
-struct ImGuiTextBuffer;
-
 namespace coffeepot
 {
     struct ExecutionState
@@ -53,7 +51,7 @@ namespace coffeepot
         bool isExecutingAction() const { return m_ExecutionState.b_Running; }
         void killExecution();
 
-        void readOutput(ImGuiTextBuffer& textOutput);
+        void moveBuffer(std::vector<char>& destination);
 
     private:
         void threadedTick();
@@ -76,7 +74,7 @@ namespace coffeepot
         Playlist m_ExecutionPlaylist;
 
         ExecutionState m_ExecutionState;
-        std::array<char, 2048> m_OutputBuffer;
+        std::array<char, 2048> m_Buffer;
 
         std::thread m_Thread;
 		std::atomic<bool> b_Ending;

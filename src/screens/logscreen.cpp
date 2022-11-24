@@ -5,6 +5,8 @@
 #include "fa_icons.h"
 #include "utils/imgui_helper.h"
 
+#include <algorithm>
+
 namespace coffeepot
 {   
     LogScreen::LogScreen()
@@ -17,8 +19,8 @@ namespace coffeepot
 
     void LogScreen::tickContent()
     {
-        ActionsManager::get()->readOutput(m_TextBuffer);
-        ImGui::TextUnformatted(m_TextBuffer.c_str());
+        ActionsManager::get()->moveBuffer(m_TextBuffer);
+        ImGui::TextUnformatted(m_TextBuffer.data());
 
         if (b_AutoScrollDown)
             ImGui::SetScrollHereY(1.f);
@@ -26,8 +28,11 @@ namespace coffeepot
 
     void LogScreen::tickFooter()
 	{
-		if (ImGui::IconButton(ICON_FA_ERASER))
-			m_TextBuffer.clear();
+        if (ImGui::IconButton(ICON_FA_ERASER))
+		{
+			std::fill(m_TextBuffer.begin(), m_TextBuffer.end(), 0);
+            m_TextBuffer.clear(); // Doesnt resize
+		}
 
 		ImGui::SameLine(0.f, 2);
 		ImGui::Text("|");
