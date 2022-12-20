@@ -38,8 +38,11 @@ namespace coffeepot
 					m_ActionTemplate.m_Name = "New Action";
 
 				// Finalize Options
-				for (auto& option : m_ActionTemplate.m_Options)
+				for (int32_t i = 0; i < m_ActionTemplate.m_Options.size(); i++)
 				{
+					auto& option = m_ActionTemplate.m_Options[i];
+					option.m_Details.m_ID = i;
+
 					option.m_Value = option.m_Details.m_ValueList[0];
 					option.b_Active = option.m_Details.m_Electivity == Electivity::Required;
 				}
@@ -259,7 +262,6 @@ namespace coffeepot
 			if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
 			{
 				Option& newOption = m_ActionTemplate.m_Options.emplace_back();
-				newOption.m_Details.m_ID = static_cast<int32_t>(m_ActionTemplate.m_Options.size());
 				newOption.m_Details.m_Name = "New Option";
 				newOption.m_Details.m_ValueList.emplace_back(""); // Add a Value as the Default one
 			}
