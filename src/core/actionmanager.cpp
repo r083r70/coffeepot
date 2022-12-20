@@ -77,7 +77,7 @@ namespace coffeepot
         return true;
     }
 
-    bool ActionsManager::executePlaylist(const Playlist& playlist)
+	bool ActionsManager::executePlaylist(const Playlist& playlist)
     {
 		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
 
@@ -100,12 +100,16 @@ namespace coffeepot
     {
         if (!g_OutputMutex.try_lock())
             return;
+
+        // Create terminator
+        if (destination.empty())
+            destination.push_back(0);
         
         const char* bufferRaw = m_Buffer.data();
         size_t bufferSize = strlen(bufferRaw);
 
-        // Insert data into the Destination
-        destination.insert(destination.end(), bufferRaw, bufferRaw + bufferSize);
+        // Insert data into the Destination before the terminator
+		destination.insert(destination.end() - 1, bufferRaw, bufferRaw + bufferSize);
 
 		// Clean the data from the Buffer
 		std::fill(m_Buffer.begin(), m_Buffer.end(), 0);
@@ -134,13 +138,13 @@ namespace coffeepot
 		std::array<char, 2048> localBuffer;
         for (;;)
 		{
-            size_t bufferFreeSize = 0; // Check Buffer freeSize
-            {
-                const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
+			size_t bufferFreeSize = 0; // Check Buffer freeSize
+			{
+				const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
 
-                const size_t bufferLength = strlen(m_Buffer.data());
-                bufferFreeSize = m_Buffer.size() - bufferLength;
-            }
+				const size_t bufferLength = strlen(m_Buffer.data());
+				bufferFreeSize = m_Buffer.size() - bufferLength;
+			}
 
             if (bufferFreeSize <= 0) // Buffer is full, retry later
             {
@@ -148,12 +152,12 @@ namespace coffeepot
                 continue;
             }
 
-            // Read in the LocalBuffer and later copy in the Output
+			// Read in the LocalBuffer and later copy in the Output
 #if CP_WINDOWS
 			DWORD readBytes;
 			if (ReadFile(m_ExecutionState.m_ProcessOutput, localBuffer.data(), bufferFreeSize - 1, &readBytes, nullptr))
 			{
-                localBuffer[readBytes] = '\0'; // ReadFile doesnt set Termination char
+				localBuffer[readBytes] = '\0'; // ReadFile doesnt set Termination char
 #elif CP_LINUX
 			if (fgets(localBuffer.data(), bufferFreeSize, m_ExecutionState.m_Pipe))
 			{
@@ -161,26 +165,26 @@ namespace coffeepot
 			if (false)
 			{
 #endif
-			    const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
+				const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
 
-                char* bufferRaw = m_Buffer.data();
-                const size_t bufferLength = strlen(bufferRaw);
-                memcpy(&bufferRaw[bufferLength], localBuffer.data(), bufferFreeSize);
-            }
-            // Read failed > Action is completed
-            else
-            {
+				char* bufferRaw = m_Buffer.data();
+				const size_t bufferLength = strlen(bufferRaw);
+				memcpy(&bufferRaw[bufferLength], localBuffer.data(), bufferFreeSize);
+			}
+			// Read failed > Action is completed
+			else
+			{
 #if CP_WINDOWS
 				CloseHandle(m_ExecutionState.m_ProcessOutput);
 #elif CP_LINUX
 				fclose(m_ExecutionState.m_Pipe);
 #endif
 
-                stopCurrentAction();
+				stopCurrentAction();
                 break;
-            }
-        }
-    }
+			}
+		}
+	}
 
 	bool ActionsManager::maybeStartNextAction()
     {
