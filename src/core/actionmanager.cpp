@@ -115,7 +115,6 @@ namespace coffeepot
 
 	void ActionsManager::threadedTick()
     {
-        std::array<char, 2048> localBuffer;
         while (!b_Ending)
 		{
             std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Sleep half a second to avoid overusing the Locks
@@ -126,6 +125,15 @@ namespace coffeepot
             if (!m_ExecutionState.b_Running)
                 continue;
 
+            executeAction();
+        }
+	}
+
+	void ActionsManager::executeAction()
+	{
+		std::array<char, 2048> localBuffer;
+        for (;;)
+		{
             size_t bufferFreeSize = 0; // Check Buffer freeSize
             {
                 const std::lock_guard<std::mutex> outputLock(g_OutputMutex);
@@ -135,7 +143,10 @@ namespace coffeepot
             }
 
             if (bufferFreeSize <= 0) // Buffer is full, retry later
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 continue;
+            }
 
             // Read in the LocalBuffer and later copy in the Output
 #if CP_WINDOWS
@@ -166,6 +177,7 @@ namespace coffeepot
 #endif
 
                 stopCurrentAction();
+                break;
             }
         }
     }

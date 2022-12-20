@@ -54,7 +54,8 @@ namespace coffeepot
         void moveBuffer(std::vector<char>& destination);
 
     private:
-        void threadedTick();
+		void threadedTick();
+		void executeAction();
         
         bool maybeStartNextAction();
         bool startAction(const Action& action);
