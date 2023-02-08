@@ -181,7 +181,8 @@ namespace coffeepot
         const auto createActionNode = [&createOptionNode](const Action& action) -> YAML::Node
         {
             YAML::Node actionNode;
-            actionNode["id"] = action.m_ID;
+			actionNode["id"] = action.m_ID;
+			actionNode["name"] = action.m_Name;
 
             for (auto& option : action.m_Options)
 			{
@@ -225,10 +226,13 @@ namespace coffeepot
         const auto createAction = [&actions](const YAML::Node& actionNode) -> Action
         {
             const int actionId = actionNode["id"].as<int>();
-            auto baseAction = std::find_if(actions.begin(), actions.end(), [actionId](const auto& elem) { return elem.m_ID == actionId; });
-
-            assert(baseAction != actions.end());
+            const auto baseAction = std::find_if(actions.begin(), actions.end(), [actionId](const auto& elem) { return elem.m_ID == actionId; });
+            
+			assert(baseAction != actions.end());
             Action action = *baseAction;
+
+			if (const auto& nameNode = actionNode["name"])
+				action.m_Name = nameNode.as<std::string>();
 
 			const auto& optionsNode = actionNode["options"];
             if (!optionsNode)

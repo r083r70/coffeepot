@@ -25,6 +25,9 @@ namespace coffeepot
         Playlist* m_RenamingPlaylist = nullptr;
         std::string m_NewPlaylistName;
 
+        Action* m_RenamingAction = nullptr;
+		std::string m_NewActionName;
+
 		// Delete
         Playlist* m_DeletingPlaylist = nullptr;
         bool b_DeleteConfirmed = false;

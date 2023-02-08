@@ -155,7 +155,7 @@ namespace coffeepot
 				ImGui::TableNextRow();
 				bool bShowOptions = false;
 
-				// Action Name
+				// Action
 				{
 					// First Column
 					ImGui::TableSetColumnIndex(0);
@@ -170,46 +170,69 @@ namespace coffeepot
 					ImGui::TableSetColumnIndex(1);
 					ImGui::AlignTextToFramePadding();
 
-					// Execute
-					if (ImGui::IconButton(ICON_FA_CIRCLE_PLAY))
+					if (m_RenamingAction == &action)
 					{
-						ActionsManager::get()->executeAction(action);
+						if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
+						{
+							action.m_Name = m_NewActionName;
+							m_RenamingAction = nullptr;
+						}
+
+						ImGui::SameLine();
+						ImGui::SetNextItemWidth(-FLT_MIN);
+						ImGui::InputString("NewName", m_NewActionName);
 					}
-
-					ImGui::SameLine(0.f, 2);
-					ImGui::Text("|");
-
-					// Add
-					ImGui::SameLine(0.f, 2);
-					if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
+					else
 					{
-						m_ExpandingPlaylist = &playlist;
-						m_ExpansionIndex = i;
-					}
+						// Execute
+						if (ImGui::IconButton(ICON_FA_CIRCLE_PLAY))
+						{
+							ActionsManager::get()->executeAction(action);
+						}
 
-					// Move Down
-					ImGui::SameLine(0.f, 3);
-					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
-					{
-						swapIndex1 = i;
-						swapIndex2 = i + 1;
-					}
+						ImGui::SameLine(0.f, 2);
+						ImGui::Text("|");
 
-					// Move Up
-					ImGui::SameLine(0.f, 3);
-					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
-					{
-						swapIndex1 = i;
-						swapIndex2 = i - 1;
-					}
+						// Add
+						ImGui::SameLine(0.f, 2);
+						if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
+						{
+							m_ExpandingPlaylist = &playlist;
+							m_ExpansionIndex = i;
+						}
 
-					// Remove
-					ImGui::SameLine(0.f, 3);
-					if (ImGui::IconButton(ICON_FA_XMARK))
-						removeIndex = i;
+						// Move Down
+						ImGui::SameLine(0.f, 3);
+						if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
+						{
+							swapIndex1 = i;
+							swapIndex2 = i + 1;
+						}
+
+						// Move Up
+						ImGui::SameLine(0.f, 3);
+						if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
+						{
+							swapIndex1 = i;
+							swapIndex2 = i - 1;
+						}
+
+						// Rename
+						ImGui::SameLine(0.f, 2);
+						if (ImGui::IconButton(ICON_FA_PEN))
+						{
+							m_RenamingAction = &action;
+							m_NewActionName = action.m_Name;
+						}
+
+						// Remove
+						ImGui::SameLine(0.f, 3);
+						if (ImGui::IconButton(ICON_FA_XMARK))
+							removeIndex = i;
+					}
 				}
 
-				// Show Options
+				// Options
 				if (bShowOptions)
 				{
 					auto& options = action.m_Options;
