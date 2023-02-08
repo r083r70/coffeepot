@@ -12,6 +12,7 @@ void coffeepot::GlobalOptionScreen::tickContent()
 
 	for (auto& [name, value] : ActionsManager::get()->GlobalOptions)
 	{
+		ImGui::PushID(&value);
 		ImGui::TableNextRow();
 
 		ImGui::TableSetColumnIndex(0);
@@ -22,6 +23,7 @@ void coffeepot::GlobalOptionScreen::tickContent()
 		ImGui::AlignTextToFramePadding();
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::InputString("Option", value, ImGuiInputTextFlags_CharsNoBlank);
+		ImGui::PopID();
 	}
 
 	ImGui::EndTable();
