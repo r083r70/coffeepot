@@ -1,6 +1,6 @@
 workspace "coffeepot"
 	architecture "x86_64"
-	configurations { "Debug", "Release" }
+	configurations { "Debug", "Release", "Dist" }
 	startproject "coffeepot"
 
 include "kettle/kettleCore"
@@ -40,6 +40,11 @@ project "coffeepot"
 
 	filter "Release"
         defines { "CP_RELEASE" }
+		optimize "On"
+
+	filter "Dist"
+		kind "WindowedApp"
+		defines { "CP_DIST" }
 		optimize "On"
 
 	filter "system:windows"
