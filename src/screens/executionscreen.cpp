@@ -15,8 +15,8 @@ namespace coffeepot
 		const Playlist& playlist = ActionsManager::get()->getExecutionPlaylist();
 		const auto& actions = playlist.getActions();
 
-		const bool isRunningAction = ActionsManager::get()->isExecutingAction();
-		const size_t currentActionIndex = playlist.getNextActionIndex() - (isRunningAction ? 1 : 0);
+		const bool isExecuting = ActionsManager::get()->isExecuting();
+		const size_t currentActionIndex = playlist.getNextActionIndex() - (isExecuting ? 1 : 0);
 
 		for (size_t index = 0; index < actions.size(); index++)
 		{

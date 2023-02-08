@@ -18,7 +18,6 @@
 #include <unistd.h>
 #endif
 
-
 namespace coffeepot
 {
     ActionsManager* ActionsManager::s_Instance = nullptr;
@@ -70,8 +69,8 @@ namespace coffeepot
 	{
 		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
 
-        if (!m_ExecutionState.b_Running)
-            m_ExecutionPlaylist.removeAllAction(); // Clean Playlist
+        if (!isExecuting())
+            m_ExecutionPlaylist.removeAllAction(); // Clean Playlist > It resets the nextActionIndex
 
         m_ExecutionPlaylist.addAction(action);
         return true;
@@ -81,8 +80,8 @@ namespace coffeepot
     {
 		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
 
-        if (!isExecutingAction())
-            m_ExecutionPlaylist.removeAllAction(); // It resets the nextActionIndex
+        if (!isExecuting())
+            m_ExecutionPlaylist.removeAllAction(); // Clean Playlist > It resets the nextActionIndex
 
         for (auto& action : playlist.getActions())
             m_ExecutionPlaylist.addAction(action);

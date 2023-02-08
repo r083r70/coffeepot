@@ -43,12 +43,12 @@ namespace coffeepot
 		void reloadAll();
 		void saveAll();
 
-        const Playlist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
+		const Playlist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
+		bool isExecuting() const { return m_ExecutionState.b_Running || m_ExecutionPlaylist.hasNextAction(); }
 
         bool executeAction(const Action& action);
         bool executePlaylist(const Playlist& playlist);
 
-        bool isExecutingAction() const { return m_ExecutionState.b_Running; }
         void killExecution();
 
         void moveBuffer(std::vector<char>& destination);
