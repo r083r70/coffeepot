@@ -2,14 +2,20 @@ playlists:
   - name: PTest
     actions:
       - id: 1
+        name: Git Status Ciao
       - id: 2
+        name: Git -V
       - id: 3
+        name: List Files
       - id: 4
+        name: Git Fetch 2
         options:
           - id: 0
             value: rhgth
       - id: 5
+        name: Test
         options:
           - id: 0
             value: Two
       - id: 6
+        name: Checkbox
