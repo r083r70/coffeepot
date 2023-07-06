@@ -43,25 +43,28 @@ namespace coffeepot
 		void reloadAll();
 		void saveAll();
 
-		const Playlist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
-		bool isExecuting() const { return m_ExecutionState.b_Running || m_ExecutionPlaylist.hasNextAction(); }
+        const Playlist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
 
+        bool isExecutionPlaylistValid() const;
+        bool isExecuting() const;
+
+		bool executePlaylist(const Playlist& playlist);
         bool executeAction(const Action& action);
-        bool executePlaylist(const Playlist& playlist);
+        bool removeAction(size_t actionIndex);
 
-        void killExecution();
+		void killExecution();
 
         void moveBuffer(std::vector<char>& destination);
 
-    private:
+	private:
 		void threadedTick();
 		void executeAction();
         
         bool maybeStartNextAction();
-        bool startAction(const Action& action);
+		bool startAction(const Action& action);
 
         void emptyExecutionPlaylist();
-        void stopCurrentAction();
+		void stopCurrentAction();
 
         void killAction();
 	

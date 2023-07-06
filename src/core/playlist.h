@@ -10,17 +10,21 @@ namespace coffeepot
 	public:
         Playlist() = default;
 
-        const std::vector<Action>& getActions() const { return m_Actions; }
-        std::vector<Action>& getActions() { return m_Actions; }
-
+        // Actions
         void addAction(const Action& action);
-        void removeAllAction();
+		void removeAction(size_t actionIndex);
+		void removeAllActions();
 
-		size_t getNextActionIndex() const { return m_NextActionIndex; }
-        bool hasNextAction() const;
-		const Action& getNextAction();
+		const std::vector<Action>& getActions() const { return m_Actions; }
+		std::vector<Action>& getActions() { return m_Actions; }
 
+		// Execution
 		bool startExecution();
+		void stopExecution();
+
+        size_t getCurrentActionIndex() const;
+        bool hasNextActionForExecution() const;
+		const Action& getNextActionForExecution();
 
     public:
         std::string m_Name;

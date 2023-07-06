@@ -10,6 +10,7 @@
 #include <mutex>
 
 #if CP_WINDOWS
+#include <atlbase.h>
 #include <atlconv.h>
 #include <windows.h>
 #elif CP_LINUX
@@ -65,35 +66,52 @@ namespace coffeepot
 		Serializer::savePlaylists(Playlists);
 	}
 
-    bool ActionsManager::executeAction(const Action& action)
+	bool ActionsManager::isExecutionPlaylistValid() const
+	{
+		return m_ExecutionState.b_Running || m_ExecutionPlaylist.hasNextActionForExecution();
+	}
+
+	bool ActionsManager::isExecuting() const
+	{
+        return m_ExecutionState.b_Running;
+	}
+
+	bool ActionsManager::executePlaylist(const Playlist& playlist)
 	{
 		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
 
-        if (!isExecuting())
-            m_ExecutionPlaylist.removeAllAction(); // Clean Playlist > It resets the nextActionIndex
+		if (!isExecutionPlaylistValid())
+			m_ExecutionPlaylist.removeAllActions(); // Clean Playlist > It resets the nextActionIndex
+
+		for (auto& action : playlist.getActions())
+			m_ExecutionPlaylist.addAction(action);
+
+		return true;
+	}
+
+	bool ActionsManager::executeAction(const Action& action)
+	{
+		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+
+        if (!isExecutionPlaylistValid())
+            m_ExecutionPlaylist.removeAllActions(); // Clean Playlist > It resets the nextActionIndex
 
         m_ExecutionPlaylist.addAction(action);
         return true;
     }
 
-	bool ActionsManager::executePlaylist(const Playlist& playlist)
-    {
+	bool ActionsManager::removeAction(size_t actionIndex)
+	{
 		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
-
-        if (!isExecuting())
-            m_ExecutionPlaylist.removeAllAction(); // Clean Playlist > It resets the nextActionIndex
-
-        for (auto& action : playlist.getActions())
-            m_ExecutionPlaylist.addAction(action);
-
-        return true;
-    }
+		m_ExecutionPlaylist.removeAction(actionIndex);
+		return true;
+	}
 
     void ActionsManager::killExecution()
     {
         emptyExecutionPlaylist();
         stopCurrentAction();
-    }
+	}
 
 	void ActionsManager::moveBuffer(std::vector<char>& destination)
     {
@@ -188,10 +206,10 @@ namespace coffeepot
 	bool ActionsManager::maybeStartNextAction()
     {
         const std::lock_guard<std::mutex> lock(g_ActionMutex);
-        if (!m_ExecutionPlaylist.hasNextAction())
+        if (!m_ExecutionPlaylist.hasNextActionForExecution())
             return false;
         
-        const Action& nextAction = m_ExecutionPlaylist.getNextAction();
+        const Action& nextAction = m_ExecutionPlaylist.getNextActionForExecution();
         return startAction(nextAction);
     }
 
@@ -230,7 +248,7 @@ namespace coffeepot
 		// Create suspended Process
 		USES_CONVERSION;
         const std::string cmd = action.createFullCommand();
-		bSuccess = CreateProcess(nullptr, A2W(cmd.data()), nullptr, nullptr, true, CREATE_NO_WINDOW | CREATE_SUSPENDED, nullptr, nullptr, &startupInfo, &processInformation);
+		bSuccess = CreateProcess(nullptr, ATL::CA2W(cmd.data()), nullptr, nullptr, true, CREATE_NO_WINDOW | CREATE_SUSPENDED, nullptr, nullptr, &startupInfo, &processInformation);
 		if (!bSuccess)
 			return false;
 
@@ -282,7 +300,7 @@ namespace coffeepot
     void ActionsManager::emptyExecutionPlaylist()
     {
         const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
-        m_ExecutionPlaylist.removeAllAction();
+        m_ExecutionPlaylist.removeAllActions();
     }
 
     void ActionsManager::stopCurrentAction()
