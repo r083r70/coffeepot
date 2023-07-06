@@ -12,37 +12,37 @@ void coffeepot::MainMenuBarScreen::tick()
         return;
 
     if (ImGui::BeginMenu("Coffeepot"))
-	{
+    {
         if (ImGui::MenuItem("Reload All"))
             ActionsManager::get()->reloadAll();
 
         if (ImGui::MenuItem("Save All"))
             ActionsManager::get()->saveAll();
 
-		if (ImGui::MenuItem("Exit"))
-			kettle::App::get()->terminate();
+        if (ImGui::MenuItem("Exit"))
+            kettle::App::get()->terminate();
 
-		ImGui::EndMenu();
+        ImGui::EndMenu();
     }
-    
+
     ImGui::EndMainMenuBar();
 }
 
 void coffeepot::ScreenWithFooter::tick()
 {
-    if (!ImGui::Begin(m_Name, nullptr, ImGuiWindowFlags_NoScrollbar))
-        return;
-
-	const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
-    const float footerHeight = ImGui::GetFrameHeight() + itemSpacing * 2;
-    if (ImGui::BeginChild("Content", ImVec2(0, -footerHeight)))
+    if (ImGui::Begin(m_Name, nullptr, ImGuiWindowFlags_NoScrollbar))
     {
-        tickContent();
-        ImGui::EndChild();
-    }
+        const float itemSpacing = ImGui::GetStyle().ItemSpacing.y;
+        const float footerHeight = ImGui::GetFrameHeight() + itemSpacing * 2;
 
-    ImGui::Separator();
-    tickFooter();
+        if (ImGui::BeginChild("Content", ImVec2(0, -footerHeight)))
+            tickContent();
+
+        ImGui::EndChild();
+        ImGui::Separator();
+
+        tickFooter();
+    }
     
     ImGui::End();
 }
