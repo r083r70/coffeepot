@@ -16,7 +16,7 @@ namespace coffeepot
 
 	private:
 		enum class ActionState { None, Done, Running, Waiting };
-		void listAction(const Action& action, ActionState actionState);
+		void listAction(const Action& action, size_t actionIndex, ActionState actionState);
 	};
 }
 
