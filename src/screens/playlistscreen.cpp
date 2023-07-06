@@ -96,11 +96,11 @@ namespace coffeepot
 				if (ImGui::IconButton(ICON_FA_PLAY))
 					ActionsManager::get()->executePlaylist(playlist);
 
-				ImGui::SameLine(0.f, 2);
+				ImGui::SameLine(0.f, 3);
 				ImGui::Text("|");
 
 				// Add Action
-				ImGui::SameLine(0.f, 2);
+				ImGui::SameLine(0.f, 3);
 				if (ImGui::IconButton(ICON_FA_PLUS))
 				{
 					m_ExpandingPlaylist = &playlist;
@@ -190,11 +190,11 @@ namespace coffeepot
 							ActionsManager::get()->executeAction(action);
 						}
 
-						ImGui::SameLine(0.f, 2);
+						ImGui::SameLine(0.f, 3);
 						ImGui::Text("|");
 
 						// Add
-						ImGui::SameLine(0.f, 2);
+						ImGui::SameLine(0.f, 3);
 						if (ImGui::IconButton(ICON_FA_CIRCLE_PLUS))
 						{
 							m_ExpandingPlaylist = &playlist;
@@ -218,7 +218,7 @@ namespace coffeepot
 						}
 
 						// Rename
-						ImGui::SameLine(0.f, 2);
+						ImGui::SameLine(0.f, 3);
 						if (ImGui::IconButton(ICON_FA_PEN))
 						{
 							m_RenamingAction = &action;

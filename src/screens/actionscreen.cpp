@@ -142,11 +142,11 @@ namespace coffeepot
 					if (ImGui::IconButton(ICON_FA_PLAY))
 						ActionsManager::get()->executeAction(action);
 
-					ImGui::SameLine(0.f, 2);
+					ImGui::SameLine(0.f, 3);
 					ImGui::Text("|");
 
 					// Move Down
-					ImGui::SameLine(0.f, 2);
+					ImGui::SameLine(0.f, 3);
 					if (DrawIconButtonEx(ICON_FA_ARROW_DOWN, !bIsLast))
 					{
 						swapIndex1 = i;
@@ -154,7 +154,7 @@ namespace coffeepot
 					}
 
 					// Move Up
-					ImGui::SameLine(0.f, 2);
+					ImGui::SameLine(0.f, 3);
 					if (DrawIconButtonEx(ICON_FA_ARROW_UP, !bIsFirst))
 					{
 						swapIndex1 = i;
@@ -266,7 +266,7 @@ namespace coffeepot
 				newOption.m_Details.m_ValueList.emplace_back(""); // Add a Value as the Default one
 			}
 
-			ImGui::SameLine(0.f, 2);
+			ImGui::SameLine(0.f, 3);
 			ImGui::BeginDisabled(m_ActionTemplate.m_Options.empty());
 			if (ImGui::IconButton(ICON_FA_CIRCLE_MINUS))
 				m_ActionTemplate.m_Options.pop_back();
@@ -382,7 +382,7 @@ namespace coffeepot
 				if (ImGui::IconButton(ICON_FA_SQUARE_PLUS))
 					optionDetails.m_ValueList.emplace_back("");
 
-				ImGui::SameLine(0.f, 2);
+				ImGui::SameLine(0.f, 3);
 				ImGui::BeginDisabled(optionDetails.m_ValueList.size() == 1);
 				if (ImGui::IconButton(ICON_FA_SQUARE_MINUS))
 					optionDetails.m_ValueList.pop_back();

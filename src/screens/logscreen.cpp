@@ -34,10 +34,10 @@ namespace coffeepot
             m_TextBuffer.clear(); // Doesnt resize
 		}
 
-		ImGui::SameLine(0.f, 2);
+		ImGui::SameLine(0.f, 3);
 		ImGui::Text("|");
 
-		ImGui::SameLine(0.f, 2);
+		ImGui::SameLine(0.f, 3);
         if (b_AutoScrollDown)
 		    ImGui::Checkbox(ICON_FA_ANGLES_DOWN, &b_AutoScrollDown);
 		else
