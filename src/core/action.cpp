@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <charconv>
+#include <cstring>
 
 namespace coffeepot
 {
