@@ -11,6 +11,7 @@ namespace coffeepot
         LogScreen();
 
     protected:
+        virtual void tick() override;
         virtual void tickContent() override;
         virtual void tickFooter() override;
 

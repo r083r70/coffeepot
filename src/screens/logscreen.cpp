@@ -17,11 +17,15 @@ namespace coffeepot
 		m_TextBuffer.clear();
 	}
 
-    void LogScreen::tickContent()
-    {
-        ActionsManager::get()->moveBuffer(m_TextBuffer);
-        ImGui::TextUnformatted(m_TextBuffer.data());
+	void LogScreen::tick()
+	{
+		ScreenWithFooter::tick();
+		ActionsManager::get()->moveBuffer(m_TextBuffer); // Keep updating the Buffer to free it
+	}
 
+	void LogScreen::tickContent()
+	{
+        ImGui::TextUnformatted(m_TextBuffer.data());
         if (b_AutoScrollDown)
             ImGui::SetScrollHereY(1.f);
     }

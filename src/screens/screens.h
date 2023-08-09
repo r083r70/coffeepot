@@ -18,6 +18,7 @@ namespace coffeepot
     {
     public:
         virtual void tick();
+
     protected:
         ScreenWithFooter(const char* name) : m_Name(name) {}
         virtual void tickContent() = 0;
