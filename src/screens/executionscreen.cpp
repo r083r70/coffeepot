@@ -12,55 +12,60 @@ namespace coffeepot
 {
 	void ExecutionScreen::tickContent()
 	{
-		const bool bIsExecutionPlaylistValid = ActionsManager::get()->isExecutionPlaylistValid();
 		const bool bIsExecuting = ActionsManager::get()->isExecuting();
 
-		const Playlist& playlist = ActionsManager::get()->getExecutionPlaylist();
-		const size_t currentActionIndex = playlist.getCurrentActionIndex();
+		const ExecutionPlaylist& playlist = ActionsManager::get()->getExecutionPlaylist();
+		const int32_t lastCompletedActionIndex = playlist.getLastCompletedActionIndex();
+		const int32_t activeActionIndex = playlist.getActiveActionIndex();
+
 		const auto& actions = playlist.getActions();
 
-		for (size_t index = 0; index < actions.size(); index++)
+		for (int32_t index = 0; index < actions.size(); index++)
 		{
 			ActionState actionState = ActionState::None;
-			if (index < currentActionIndex || !bIsExecutionPlaylistValid)
-				actionState = ActionState::Done;
-			else if (index == currentActionIndex && bIsExecuting)
-				actionState = ActionState::Running;
-			else
-				actionState = ActionState::Waiting;
 
-			listAction(actions[index], index, actionState);
+			if (index <= lastCompletedActionIndex)
+				actionState = ActionState::Done;
+			else if (index == activeActionIndex)
+				actionState = ActionState::Running;
+			else if (bIsExecuting)
+				actionState = ActionState::Waiting;
+			else
+				actionState = ActionState::Skipped;
+
+			listAction(actions[index], index, actionState, bIsExecuting);
 		}
     }
 
 	void ExecutionScreen::tickFooter()
 	{
+		const bool bIsExecuting = ActionsManager::get()->isExecuting();
+
 		ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x * 0.5f - 25);
-		if (ImGui::IconButton(ICON_FA_SKULL))
-			ActionsManager::get()->killExecution();
 
-		ImGui::SameLine(0.f, 3);
-		const bool bIsExecutionPlaylistValid = ActionsManager::get()->isExecutionPlaylistValid();
-		ImGui::BeginDisabled(bIsExecutionPlaylistValid);
-
-		ImGui::SameLine(0.f, 3);
-		if (ImGui::IconButton(ICON_FA_TRASH_CAN))
+		// ExecutionActive - Commands
+		ImGui::BeginDisabled(!bIsExecuting);
 		{
-			//ActionsManager::get()->clearExecution();
+			if (ImGui::IconButton(ICON_FA_SKULL))
+				ActionsManager::get()->killExecution();
 		}
+		ImGui::EndDisabled();
 
-		ImGui::SameLine(0.f, 3);
-		if (ImGui::IconButton(ICON_FA_ROTATE_RIGHT))
+		// ExecutionInactive - Commands
+		ImGui::BeginDisabled(bIsExecuting);
 		{
-			// Reset execution Playlist to make it valid and start
-			Playlist playlist = ActionsManager::get()->getExecutionPlaylist();
-			ActionsManager::get()->executePlaylist(playlist);
+			ImGui::SameLine(0.f, 3);
+			if (ImGui::IconButton(ICON_FA_TRASH_CAN))
+				ActionsManager::get()->clearExecutionPlaylist();
+
+			ImGui::SameLine(0.f, 3);
+			if (ImGui::IconButton(ICON_FA_ROTATE_RIGHT))
+				ActionsManager::get()->restartExecutionPlaylist();
 		}
-		
 		ImGui::EndDisabled();
 	}
 
-	void ExecutionScreen::listAction(const Action& action, size_t actionIndex, ActionState actionState)
+	void ExecutionScreen::listAction(const Action& action, int32_t actionIndex, ActionState actionState, bool bIsExecutionActive)
 	{
 		ImGui::PushID(&action);
 
@@ -71,13 +76,15 @@ namespace coffeepot
 		case ActionState::Done:			ImGui::Text(ICON_FA_CIRCLE_CHECK); break;
 		case ActionState::Running:		ImGui::Text(ICON_FA_BOLT); break;
 		case ActionState::Waiting:		ImGui::Text(ICON_FA_HOURGLASS_EMPTY); break;
+		case ActionState::Skipped:		ImGui::Text(ICON_FA_BAN); break;
 		default:						assert(false);
 		}
 
 		ImGui::SameLine();
 		ImGui::Text(action.m_Name.c_str());
 
-		ImGui::BeginDisabled(actionState != ActionState::Waiting);
+		const bool bCanRemoveAction = actionState == ActionState::Waiting || !bIsExecutionActive;
+		ImGui::BeginDisabled(!bCanRemoveAction);
 		{
 			ImGui::SameLine(ContentRegionAvail - 25.f);
 			if (ImGui::IconButton(ICON_FA_XMARK))

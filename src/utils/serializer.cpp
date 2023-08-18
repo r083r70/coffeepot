@@ -196,7 +196,7 @@ namespace coffeepot
         const auto createPlaylistNode = [&createActionNode](const Playlist& playlist) -> YAML::Node
         {
             YAML::Node playlistNode;
-            playlistNode["name"] = playlist.m_Name;
+            playlistNode["name"] = playlist.getName();
 
             for (auto& action : playlist.getActions())
                 playlistNode["actions"].push_back(createActionNode(action));
@@ -258,7 +258,9 @@ namespace coffeepot
             const YAML::Node playlistNode = *it;
 
             Playlist playlist;
-            playlist.m_Name = playlistNode["name"].as<std::string>();
+
+			std::string playlistName = playlistNode["name"].as<std::string>();
+			playlist.setName(playlistName);
 
 			const auto& actionsNode = playlistNode["actions"];
 			if (!actionsNode) // Empty Playlist > Ignore

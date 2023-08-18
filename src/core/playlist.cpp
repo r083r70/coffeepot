@@ -4,47 +4,70 @@
 
 namespace coffeepot
 {
+	//--------------------------------------------------//
+	//-------------------- Playlist --------------------//
+	//--------------------------------------------------//
+
 	void Playlist::addAction(const Action& action)
 	{
 		m_Actions.push_back(action);
 	}
 
-	void Playlist::removeAction(size_t actionIndex)
+	void Playlist::removeAction(int32_t actionIndex)
 	{
+		assert(actionIndex >= 0);
 		assert(actionIndex < m_Actions.size());
+
 		m_Actions.erase(m_Actions.begin() + actionIndex);
 	}
 
 	void Playlist::removeAllActions()
 	{
 		m_Actions.clear();
-		m_NextActionIndex = 0;
 	}
 
-	bool Playlist::startExecution()
+	//--------------------------------------------------//
+	//--------------- ExecutionPlaylist ----------------//
+	//--------------------------------------------------//
+
+	void ExecutionPlaylist::removeAction(int32_t actionIndex)
 	{
-		m_NextActionIndex = 0;
-		return hasNextActionForExecution();
+		m_Playlist.removeAction(actionIndex);
+		if (actionIndex <= m_LastCompletedActionIndex)
+			m_LastCompletedActionIndex--;
 	}
 
-	void Playlist::stopExecution()
+	void ExecutionPlaylist::removeAllActions()
 	{
-
+		m_Playlist.removeAllActions();
+		m_LastCompletedActionIndex = -1;
 	}
 
-	size_t Playlist::getCurrentActionIndex() const
+	void ExecutionPlaylist::restart()
 	{
-		return m_NextActionIndex > 0 ? (m_NextActionIndex - 1) : 0;
+		m_ActiveActionIndex = 0;
+		m_LastCompletedActionIndex = -1;
 	}
 
-	bool Playlist::hasNextActionForExecution() const
+	void ExecutionPlaylist::stop()
 	{
-		return m_NextActionIndex < m_Actions.size();
+		m_ActiveActionIndex = m_Playlist.getActionsCount();
 	}
 
-	const Action& Playlist::getNextActionForExecution()
+	void ExecutionPlaylist::advance()
 	{
-		assert(hasNextActionForExecution());
-		return m_Actions[m_NextActionIndex++];
+		m_LastCompletedActionIndex = m_ActiveActionIndex;
+		m_ActiveActionIndex++;
+	}
+
+	bool ExecutionPlaylist::isActive() const
+	{
+		return 0 <= m_ActiveActionIndex && m_ActiveActionIndex < m_Playlist.getActionsCount();
+	}
+
+	const coffeepot::Action& ExecutionPlaylist::getActiveAction() const
+	{
+		assert(isActive()); // Check for valid ActionIndex
+		return m_Playlist.getActions()[m_ActiveActionIndex];
 	}
 }

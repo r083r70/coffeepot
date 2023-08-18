@@ -26,7 +26,7 @@ namespace coffeepot
 		if (ImGui::IconButton(ICON_FA_PLUS))
 		{
 			auto& playlist = ActionsManager::get()->Playlists.emplace_back();
-			playlist.m_Name = "New Playlist";
+			playlist.setName("New Playlist");
 		}
     }
     
@@ -55,7 +55,7 @@ namespace coffeepot
     void PlaylistScreen::renderPlaylist(Playlist& playlist)
 	{
 		ImGui::PushID(&playlist);
-		const std::string& playlistName = playlist.m_Name;
+		const std::string& playlistName = playlist.getName();
 
         bool bShowActions = false;
 
@@ -73,7 +73,7 @@ namespace coffeepot
             {
 				if (ImGui::IconButton(ICON_FA_PEN_TO_SQUARE))
 				{
-                    playlist.m_Name = m_NewPlaylistName;
+                    playlist.setName(m_NewPlaylistName);
                     m_RenamingPlaylist = nullptr;
 				}
 

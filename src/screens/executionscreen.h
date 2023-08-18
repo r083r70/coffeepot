@@ -15,8 +15,8 @@ namespace coffeepot
         virtual void tickFooter() override;
 
 	private:
-		enum class ActionState { None, Done, Running, Waiting };
-		void listAction(const Action& action, size_t actionIndex, ActionState actionState);
+		enum class ActionState { None, Done, Running, Waiting, Skipped };
+		void listAction(const Action& action, int32_t actionIndex, ActionState actionState, bool bIsExecutionActive);
 	};
 }
 

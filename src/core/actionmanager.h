@@ -43,14 +43,15 @@ namespace coffeepot
 		void reloadAll();
 		void saveAll();
 
-        const Playlist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
+		const ExecutionPlaylist& getExecutionPlaylist() const { return m_ExecutionPlaylist; }
 
-        bool isExecutionPlaylistValid() const;
-        bool isExecuting() const;
+		bool isExecuting() const;
+        bool clearExecutionPlaylist();
+		bool restartExecutionPlaylist();
 
 		bool executePlaylist(const Playlist& playlist);
         bool executeAction(const Action& action);
-        bool removeAction(size_t actionIndex);
+        bool removeAction(int32_t actionIndex);
 
 		void killExecution();
 
@@ -64,7 +65,7 @@ namespace coffeepot
 		bool startAction(const Action& action);
 
         void emptyExecutionPlaylist();
-		void stopCurrentAction();
+		void stopActiveAction();
 
         void killAction();
 	
@@ -75,7 +76,7 @@ namespace coffeepot
 
     private:
         static ActionsManager* s_Instance;
-        Playlist m_ExecutionPlaylist;
+        ExecutionPlaylist m_ExecutionPlaylist;
 
         ExecutionState m_ExecutionState;
         std::array<char, 2048> m_Buffer;
