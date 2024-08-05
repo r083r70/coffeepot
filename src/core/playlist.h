@@ -17,7 +17,7 @@ namespace coffeepot
 		void removeAction(int32_t actionIndex);
 		void removeAllActions();
 
-		const size_t getActionsCount() const { return m_Actions.size(); }
+		const int32_t getActionsCount() const { return (int32_t)m_Actions.size(); }
 		const std::vector<Action>& getActions() const { return m_Actions; }
 		std::vector<Action>& getActions() { return m_Actions; }
 
@@ -46,12 +46,13 @@ namespace coffeepot
 		int32_t getActiveActionIndex() const { return m_ActiveActionIndex; }
 		int32_t getLastCompletedActionIndex() const { return m_LastCompletedActionIndex; }
 
+		bool hasActiveAction() const;
 		const Action& getActiveAction() const;
 
 	protected:
 		Playlist m_Playlist;
 
-		int32_t m_ActiveActionIndex = 0; // This will always be Positive [0, m_Actions.size]
-		int32_t m_LastCompletedActionIndex = -1; // -1 when no Action has been completed yet
+		int32_t m_ActiveActionIndex = -1;
+		int32_t m_LastCompletedActionIndex = -1;
 	};
 }

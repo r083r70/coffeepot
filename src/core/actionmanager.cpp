@@ -242,7 +242,7 @@ namespace coffeepot
 			return false;
 
 		m_ExecutionPlaylist.advance();
-		if (!m_ExecutionPlaylist.isActive()) // Execution Completed
+		if (!m_ExecutionPlaylist.hasActiveAction()) // Execution Completed
             return false;
         
         const Action& nextAction = m_ExecutionPlaylist.getActiveAction();

@@ -45,7 +45,7 @@ namespace coffeepot
 
 	void ExecutionPlaylist::restart()
 	{
-		m_ActiveActionIndex = 0;
+		m_ActiveActionIndex = -1;
 		m_LastCompletedActionIndex = -1;
 	}
 
@@ -62,12 +62,18 @@ namespace coffeepot
 
 	bool ExecutionPlaylist::isActive() const
 	{
+		// Can be Active with no ActiveAction (ie. m_ActiveActionIndex == -1)
+		return m_ActiveActionIndex < m_Playlist.getActionsCount();
+	}
+
+	bool ExecutionPlaylist::hasActiveAction() const
+	{
 		return 0 <= m_ActiveActionIndex && m_ActiveActionIndex < m_Playlist.getActionsCount();
 	}
 
 	const coffeepot::Action& ExecutionPlaylist::getActiveAction() const
 	{
-		assert(isActive()); // Check for valid ActionIndex
+		assert(hasActiveAction()); // Check for valid ActionIndex
 		return m_Playlist.getActions()[m_ActiveActionIndex];
 	}
 }
