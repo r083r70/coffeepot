@@ -64,10 +64,7 @@ namespace coffeepot
         bool maybeStartNextAction();
 		bool startAction(const Action& action);
 
-        void emptyExecutionPlaylist();
-		void stopActiveAction();
-
-        void killAction();
+		void stopActiveAction(bool bForcedTerminate = false);
 	
 	public:
 		std::vector<Action> Actions;

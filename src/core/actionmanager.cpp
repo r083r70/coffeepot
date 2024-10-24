@@ -130,7 +130,7 @@ namespace coffeepot
 
     void ActionsManager::killExecution()
 	{
-		stopActiveAction();
+		stopActiveAction(/*bForcedTerminate =*/ true);
 
 		{
 			const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
@@ -333,7 +333,7 @@ namespace coffeepot
 #endif
     }
 
-    void ActionsManager::stopActiveAction()
+	void ActionsManager::stopActiveAction(bool bForcedTerminate /*= false*/)
     {
         if (!m_ExecutionState.b_Running)
             return;
@@ -346,15 +346,21 @@ namespace coffeepot
 		TerminateProcess(m_ExecutionState.m_ProcessInformation.hProcess, 0);
 		WaitForSingleObject(m_ExecutionState.m_ProcessInformation.hProcess, INFINITE);
 
-		DWORD exitCode = 0;
-		GetExitCodeProcess(m_ExecutionState.m_ProcessInformation.hProcess, &exitCode);
-		m_ExecutionPlaylist.completeAction(exitCode == 0);
+		if (!bForcedTerminate)
+		{
+			DWORD exitCode = 0;
+			GetExitCodeProcess(m_ExecutionState.m_ProcessInformation.hProcess, &exitCode);
+			m_ExecutionPlaylist.completeAction(exitCode == 0);
+		}
 
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hProcess);
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hThread);
 		CloseHandle(m_ExecutionState.m_Job);
 #elif CP_LINUX
 		m_ExecutionState.b_Running = false;
+
+		if (!bForcedTerminate)
+			m_ExecutionPlaylist.completeAction(true);
 
         kill(-m_ExecutionState.m_PID, SIGKILL);
         waitpid(m_ExecutionState.m_PID, nullptr, 0);
