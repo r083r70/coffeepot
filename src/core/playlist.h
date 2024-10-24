@@ -5,6 +5,15 @@
 
 namespace coffeepot
 {
+	enum class ActionState
+	{
+		Ready,
+		Running,
+		Success,
+		Fail,
+		Aborted
+	};
+
     class Playlist
     {
 	public:
@@ -30,7 +39,9 @@ namespace coffeepot
 	{
 	public:
 		const std::vector<Action>& getActions() const { return m_Playlist.getActions(); }
-		void addAction(const Action& action) { m_Playlist.addAction(action); }
+		const std::vector<ActionState>& getActionStates() const { return m_ActionStates; }
+
+		void addAction(const Action& action);
 
 		void removeAction(int32_t actionIndex);
 		void removeAllActions();
@@ -39,20 +50,17 @@ namespace coffeepot
 		void stop();
 
 		void advance();
+		void completeAction(bool bSuccess);
 
-		bool isValidForExecution() const;
 		bool isActive() const;
-
-		int32_t getActiveActionIndex() const { return m_ActiveActionIndex; }
-		int32_t getLastCompletedActionIndex() const { return m_LastCompletedActionIndex; }
 
 		bool hasActiveAction() const;
 		const Action& getActiveAction() const;
 
 	protected:
 		Playlist m_Playlist;
+		std::vector<ActionState> m_ActionStates;
 
 		int32_t m_ActiveActionIndex = -1;
-		int32_t m_LastCompletedActionIndex = -1;
 	};
 }

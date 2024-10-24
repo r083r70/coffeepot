@@ -22,7 +22,7 @@
 namespace coffeepot
 {
     ActionsManager* ActionsManager::s_Instance = nullptr;
-    std::mutex g_ActionMutex;
+    std::mutex g_PlaylistMutex;
     std::mutex g_OutputMutex;
 
 	ActionsManager* ActionsManager::get()
@@ -77,21 +77,21 @@ namespace coffeepot
 
 	bool ActionsManager::clearExecutionPlaylist()
 	{
-		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+		const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
 		m_ExecutionPlaylist.removeAllActions();
 		return true;
 	}
 
 	bool ActionsManager::restartExecutionPlaylist()
 	{
-		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+		const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
 		m_ExecutionPlaylist.restart();
 		return true;
 	}
 
 	bool ActionsManager::executePlaylist(const Playlist& playlist)
 	{
-		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+		const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
 
 		if (!m_ExecutionPlaylist.isActive())
 		{
@@ -108,7 +108,7 @@ namespace coffeepot
 
 	bool ActionsManager::executeAction(const Action& action)
 	{
-		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+		const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
 
 		if (!m_ExecutionPlaylist.isActive())
 		{
@@ -123,19 +123,19 @@ namespace coffeepot
 
 	bool ActionsManager::removeAction(int32_t actionIndex)
 	{
-		const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+		const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
 		m_ExecutionPlaylist.removeAction(actionIndex);
 		return true;
 	}
 
     void ActionsManager::killExecution()
-    {
+	{
+		stopActiveAction();
+
 		{
-			const std::lock_guard<std::mutex> playlistLock(g_ActionMutex);
+			const std::lock_guard<std::mutex> playlistLock(g_PlaylistMutex);
 			m_ExecutionPlaylist.stop(); // Invalidate Playlist b4 stopping the ActiveAction
 		}
-
-        stopActiveAction();
 	}
 
 	//--------------------------------------------------//
@@ -236,7 +236,7 @@ namespace coffeepot
 
 	bool ActionsManager::maybeStartNextAction()
     {
-        const std::lock_guard<std::mutex> lock(g_ActionMutex);
+        const std::lock_guard<std::mutex> lock(g_PlaylistMutex);
 
 		if (!m_ExecutionPlaylist.isActive()) // Inactive - Need Restart
 			return false;
@@ -338,13 +338,17 @@ namespace coffeepot
         if (!m_ExecutionState.b_Running)
             return;
 
-        const std::lock_guard<std::mutex> lock(g_ActionMutex);
+        const std::lock_guard<std::mutex> lock(g_PlaylistMutex);
 
 #if CP_WINDOWS
 		m_ExecutionState.b_Running = false;
 
 		TerminateProcess(m_ExecutionState.m_ProcessInformation.hProcess, 0);
 		WaitForSingleObject(m_ExecutionState.m_ProcessInformation.hProcess, INFINITE);
+
+		DWORD exitCode = 0;
+		GetExitCodeProcess(m_ExecutionState.m_ProcessInformation.hProcess, &exitCode);
+		m_ExecutionPlaylist.completeAction(exitCode == 0);
 
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hProcess);
 		CloseHandle(m_ExecutionState.m_ProcessInformation.hThread);

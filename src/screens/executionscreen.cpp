@@ -1,12 +1,14 @@
 
 #include "executionscreen.h"
 
+#include <cassert>
+
+#include "imgui.h"
+#include "imgui_internal.h"
+
 #include "core/actionmanager.h"
 #include "fa_icons.h"
 #include "utils/imgui_helper.h"
-
-#include "imgui.h"
-#include <cassert>
 
 namespace coffeepot
 {
@@ -15,25 +17,14 @@ namespace coffeepot
 		const bool bIsExecuting = ActionsManager::get()->isExecuting();
 
 		const ExecutionPlaylist& playlist = ActionsManager::get()->getExecutionPlaylist();
-		const int32_t lastCompletedActionIndex = playlist.getLastCompletedActionIndex();
-		const int32_t activeActionIndex = playlist.getActiveActionIndex();
 
 		const auto& actions = playlist.getActions();
+		const auto& actionStates = playlist.getActionStates();
+		assert(actions.size() == actionStates.size());
 
 		for (int32_t index = 0; index < actions.size(); index++)
 		{
-			ActionState actionState = ActionState::None;
-
-			if (index <= lastCompletedActionIndex)
-				actionState = ActionState::Done;
-			else if (index == activeActionIndex)
-				actionState = ActionState::Running;
-			else if (bIsExecuting)
-				actionState = ActionState::Waiting;
-			else
-				actionState = ActionState::Skipped;
-
-			listAction(actions[index], index, actionState, bIsExecuting);
+			listAction(actions[index], index, actionStates[index], bIsExecuting);
 		}
     }
 
@@ -73,17 +64,20 @@ namespace coffeepot
 
 		switch (actionState)
 		{
-		case ActionState::Done:			ImGui::Text(ICON_FA_CIRCLE_CHECK); break;
+		case ActionState::Ready:		ImGui::Text(ICON_FA_HOURGLASS_EMPTY); break;
 		case ActionState::Running:		ImGui::Text(ICON_FA_BOLT); break;
-		case ActionState::Waiting:		ImGui::Text(ICON_FA_HOURGLASS_EMPTY); break;
-		case ActionState::Skipped:		ImGui::Text(ICON_FA_BAN); break;
+		case ActionState::Success:		ImGui::Text(ICON_FA_CHECK); break;
+		case ActionState::Fail:			ImGui::Text(ICON_FA_SKULL_CROSSBONES); break;
+		case ActionState::Aborted:		ImGui::Text(ICON_FA_BAN); break;
 		default:						assert(false);
 		}
 
 		ImGui::SameLine();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, 0.8f);
+		ImGui::SameLine();
 		ImGui::Text(action.m_Name.c_str());
 
-		const bool bCanRemoveAction = actionState == ActionState::Waiting || !bIsExecutionActive;
+		const bool bCanRemoveAction = actionState == ActionState::Ready || !bIsExecutionActive;
 		ImGui::BeginDisabled(!bCanRemoveAction);
 		{
 			ImGui::SameLine(ContentRegionAvail - 25.f);
